@@ -2,14 +2,13 @@
 
 ## Active Tracks
 
-- [Fix Player Interaction](./tracks/fix-player-interaction/index.md) - Fix broken inputs (jump, inventory toggle, etc.).
-- [Playable Demo UI](./tracks/playable-demo-ui/index.md) - Implementation of the initial playable demo with UI and Scenes.
+*(None yet)*
 
 ## Completed Tracks
 
 - [Dynamic Chunk Loading](./tracks/dynamic-chunk-loading/index.md) - Implement continuous world loading around the player.
-
-*(None yet)*
+- [Fix Player Interaction](./tracks/fix-player-interaction/index.md) - Fix broken inputs (jump, inventory toggle, etc.).
+- [Playable Demo UI](./tracks/playable-demo-ui/index.md) - Implementation of the initial playable demo with UI and Scenes.
 
 ## Future Tracks
 
