@@ -66,16 +66,16 @@ Main.tscn
 
 | Task | Ralph Loop | Core Test (MUST EXECUTE CODE) | Verify Command |
 |------|------------|-------------------------------|----------------|
-| 1. TileSet Resource | `"Task 1: TileSet Resource" → TASK1_DONE` | Create terrain_tileset.tres with placeholder tiles for each BlockType | Manual: Open in Godot editor |
-| 2. WorldRenderer + TileMapLayer | `"Task 2: WorldRenderer" → TASK2_DONE` | `test_world_renderer.gd` creates renderer, sets block, verifies tile_map updated | `godot --headless -s addons/gut/gut_cmdln.gd -gtest=test_world_renderer.gd` |
-| 3. Main Scene Structure | `"Task 3: Main Scene" → TASK3_DONE` | Create main.tscn with WorldRenderer child, set as project main scene | `godot --headless --quit` (exits cleanly = scene valid) |
-| 4. PlayerController Movement | `"Task 4: PlayerController" → TASK4_DONE` | `test_player_controller.gd` creates player, applies input, checks velocity/position | `godot --headless -s addons/gut/gut_cmdln.gd -gtest=test_player_controller.gd` |
-| 5. Player Scene + Collision | `"Task 5: Player Scene" → TASK5_DONE` | Create player.tscn with CharacterBody2D, CollisionShape2D, Sprite2D | `godot --headless --quit` (scene loads) |
-| 6. Mining Interaction | `"Task 6: Mining" → TASK6_DONE` | `test_mining.gd` simulates click on block, verifies TileWorld.get_block returns AIR and Inventory has item | `godot --headless -s addons/gut/gut_cmdln.gd -gtest=test_mining.gd` |
-| 7. Block Placement | `"Task 7: Placement" → TASK7_DONE` | `test_placement.gd` places block from inventory, verifies TileWorld updated and inventory decremented | `godot --headless -s addons/gut/gut_cmdln.gd -gtest=test_placement.gd` |
-| 8. HotbarUI | `"Task 8: HotbarUI" → TASK8_DONE` | `test_hotbar_ui.gd` adds item to inventory, verifies HotbarUI slot shows icon+count | `godot --headless -s addons/gut/gut_cmdln.gd -gtest=test_hotbar_ui.gd` |
-| 9. InventoryUI | `"Task 9: InventoryUI" → TASK9_DONE` | `test_inventory_ui.gd` opens inventory, clicks slot, verifies selection | `godot --headless -s addons/gut/gut_cmdln.gd -gtest=test_inventory_ui.gd` |
-| 10. Input Bindings + Polish | `"Task 10: Input Polish" → TASK10_DONE` | Integration test: spawn player, move, mine, place, check inventory | `godot --headless -s addons/gut/gut_cmdln.gd -gdir=tests/integration/` |
+| 1. TileSet Resource | `"Task 1: TileSet Resource" → TASK1_DONE` | Create terrain_tileset.tres with placeholder tiles for each BlockType | Manual: Open in Godot editor [x] |
+| 2. WorldRenderer + TileMapLayer | `"Task 2: WorldRenderer" → TASK2_DONE` | `test_world_renderer.gd` creates renderer, sets block, verifies tile_map updated | `../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_world_renderer.gd` [x] |
+| 3. Main Scene Structure | `"Task 3: Main Scene" → TASK3_DONE` | Create main.tscn with WorldRenderer child, set as project main scene | `../engine/Godot_v4.6-stable_win64_console.exe --headless --quit` (exits cleanly = scene valid) [x] |
+| 4. PlayerController Movement | `"Task 4: PlayerController" → TASK4_DONE` | `test_player_controller.gd` creates player, applies input, checks velocity/position | `../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_player_controller.gd` [x] |
+| 5. Player Scene + Collision | `"Task 5: Player Scene" → TASK5_DONE` | Create player.tscn with CharacterBody2D, CollisionShape2D, Sprite2D | `../engine/Godot_v4.6-stable_win64_console.exe --headless --quit` (scene loads) [x] |
+| 6. Mining Interaction | `"Task 6: Mining" → TASK6_DONE` | `test_mining.gd` simulates click on block, verifies TileWorld.get_block returns AIR and Inventory has item | `../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_mining.gd` [x] |
+| 7. Block Placement | `"Task 7: Placement" → TASK7_DONE` | `test_placement.gd` places block from inventory, verifies TileWorld updated and inventory decremented | `../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_placement.gd` [x] |
+| 8. HotbarUI | `"Task 8: HotbarUI" → TASK8_DONE` | `test_hotbar_ui.gd` adds item to inventory, verifies HotbarUI slot shows icon+count | `../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_hotbar_ui.gd` [x] |
+| 9. InventoryUI | `"Task 9: InventoryUI" → TASK9_DONE` | `test_inventory_ui.gd` opens inventory, clicks slot, verifies selection | `../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_inventory_ui.gd` [x] |
+| 10. Input Bindings + Polish | `"Task 10: Input Polish" → TASK10_DONE` | Integration test: spawn player, move, mine, place, check inventory | `../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gdir=tests/integration/` [x] |
 
 ### What Counts as a REAL Test
 
@@ -137,13 +137,13 @@ func _on_inventory_updated() -> void:
 ### Test Command
 ```bash
 # Run all tests
-/Applications/Godot.app/Contents/MacOS/Godot --headless -s addons/gut/gut_cmdln.gd
+../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd
 
 # Run specific test file
-/Applications/Godot.app/Contents/MacOS/Godot --headless -s addons/gut/gut_cmdln.gd -gtest=test_world_renderer.gd
+../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_world_renderer.gd
 
 # Run integration tests
-/Applications/Godot.app/Contents/MacOS/Godot --headless -s addons/gut/gut_cmdln.gd -gdir=tests/integration/
+../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gdir=tests/integration/
 ```
 
 ## Success Criteria (from SPEC.md)

@@ -60,7 +60,7 @@ The ECS foundation (353 tests) exists but has no visual representation. Need a p
 > **For Claude:** Use `Skill(skill="workflows:dev-test")` for automation options.
 
 - **Framework:** GUT (existing)
-- **Command:** `/Applications/Godot.app/Contents/MacOS/Godot --headless -s addons/gut/gut_cmdln.gd`
+- **Command:** `../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd`
 - **Core functionality to verify:**
   - Player movement updates position
   - Mining removes block from TileWorld and adds to Inventory
@@ -99,7 +99,7 @@ The ECS foundation (353 tests) exists but has no visual representation. Need a p
 ### Test Patterns
 - GUT framework with `watch_signals()` and `assert_signal_emitted()`
 - No scene/node testing yet - all RefCounted objects
-- Test command: `/Applications/Godot.app/Contents/MacOS/Godot --headless -s addons/gut/gut_cmdln.gd`
+- Test command: `../engine/Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd`
 
 ### No Existing Scenes
 - `game/scenes/` directory exists but empty (only `ui/` subdirectory)
@@ -127,7 +127,3 @@ The ECS foundation (353 tests) exists but has no visual representation. Need a p
 - Decision: Instant break on click (for demo), eventually to be gated behind axe tech level (e.g. steel axe needed to break bedrock+ hardness blocks)
 - Rationale: Faster iteration, hardness values can be used later when tool tech is explored further
 - Future: Add hold-to-mine with progress bar when polishing, add hardness and tool checks
-
-## Open Questions
-
-- Specific asset pack to use from Godot Asset Library?
