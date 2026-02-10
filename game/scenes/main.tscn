@@ -1,7 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://bvxk2r4m6c5qa"]
+[gd_scene load_steps=8 format=3 uid="uid://bvxk2r4m6c5qa"]
 
 [ext_resource type="Script" path="res://game/scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://game/scripts/rendering/world_renderer.gd" id="2_renderer"]
+[ext_resource type="PackedScene" uid="uid://player_scene" path="res://game/scenes/player.tscn" id="3_player"]
+[ext_resource type="Script" path="res://game/scripts/player/input_manager.gd" id="4_input_manager"]
+[ext_resource type="Script" path="res://game/scripts/player/mining_controller.gd" id="5_mining_controller"]
+[ext_resource type="Script" path="res://game/scripts/player/placement_controller.gd" id="6_placement_controller"]
+[ext_resource type="Script" path="res://game/scripts/ui/hotbar_ui.gd" id="7_hotbar_ui"]
+[ext_resource type="Script" path="res://game/scripts/ui/inventory_ui.gd" id="8_inventory_ui"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -9,4 +15,26 @@ script = ExtResource("1_main")
 [node name="WorldRenderer" type="Node2D" parent="."]
 script = ExtResource("2_renderer")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Player" parent="." instance=ExtResource("3_player")]
+position = Vector2(0, -64)
+
+[node name="InputManager" type="Node" parent="."]
+script = ExtResource("4_input_manager")
+
+[node name="MiningController" type="Node" parent="."]
+script = ExtResource("5_mining_controller")
+
+[node name="PlacementController" type="Node" parent="."]
+script = ExtResource("6_placement_controller")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HotbarUI" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("7_hotbar_ui")
+
+[node name="InventoryUI" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("8_inventory_ui")

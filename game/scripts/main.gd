@@ -1,24 +1,66 @@
 class_name Main
 extends Node2D
-## Main game scene script
+## Main game scene
 ##
-## Creates the TileWorld and connects it to WorldRenderer for visualization.
-## Renders an initial visible region around the origin.
+## Wires together world, player, controllers, and UI.
 
 var tile_world: TileWorld
+var inventory: Inventory
+
 @onready var world_renderer: WorldRenderer = $WorldRenderer
+@onready var player: PlayerController = $Player
+@onready var hotbar_ui: HotbarUI = $CanvasLayer/HotbarUI
+@onready var inventory_ui: InventoryUI = $CanvasLayer/InventoryUI
+@onready var input_manager: InputManager = $InputManager
+@onready var mining_controller: MiningController = $MiningController
+@onready var placement_controller: PlacementController = $PlacementController
 
 const WORLD_SEED = 12345
-const INITIAL_RENDER_SIZE = 64  # Render 64x64 area initially
+const TILE_SIZE = 16
+const INITIAL_RENDER_SIZE = 64
+const PLAYER_SPAWN_X = 0
 
 
 func _ready() -> void:
+	# Create core systems
 	tile_world = TileWorld.new(WORLD_SEED)
+	inventory = Inventory.new()
+
+	# Setup world renderer
 	world_renderer.set_tile_world(tile_world)
 
-	# Render initial area centered around origin
+	# Render initial area
 	var half = INITIAL_RENDER_SIZE / 2
-	world_renderer.render_region(
-		Vector2i(-half, -half),
-		Vector2i(half, half)
-	)
+	world_renderer.render_region(Vector2i(-half, -half), Vector2i(half, half))
+
+	# Setup controllers
+	mining_controller.setup(tile_world, inventory)
+	placement_controller.setup(tile_world, inventory)
+
+	# Setup UI
+	hotbar_ui.setup(inventory)
+	inventory_ui.setup(inventory)
+
+	# Setup input manager
+	input_manager.setup(player, mining_controller, placement_controller, hotbar_ui, inventory_ui)
+
+	# Spawn player above terrain
+	_spawn_player_above_terrain()
+
+
+func _spawn_player_above_terrain() -> void:
+	var surface_y = _find_surface_y(PLAYER_SPAWN_X)
+	player.position = Vector2(PLAYER_SPAWN_X * TILE_SIZE, (surface_y - 2) * TILE_SIZE)
+
+
+func _find_surface_y(x: int) -> int:
+	for y in range(100, -100, -1):
+		if tile_world.is_solid(x, y):
+			return y + 1
+	return 0
+
+
+func _physics_process(_delta: float) -> void:
+	# Update controller positions
+	mining_controller.set_player_position(player.global_position)
+	placement_controller.set_player_position(player.global_position)
