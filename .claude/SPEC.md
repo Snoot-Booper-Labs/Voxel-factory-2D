@@ -1,162 +1,133 @@
-# Spec: 2D Factory Builder - "Program Builder"
+# Spec: Playable Demo - UI/Scene Layer
 
 > **For Claude:** After writing this spec, use `Skill(skill="workflows:dev-explore")` for Phase 2.
 
 ## Problem
 
-Create a 2D factory-building game (Terraria-style) that teaches programming concepts subconsciously to children through gameplay. Players start with manual resource gathering, then progressively automate their factories using drag-and-drop command blocks, learning programming fundamentals (sequences, conditionals, loops, functions) without explicit instruction.
-
-## Vision
-
-A 2D companion/adaptation of Voxel-factory with:
-- Terraria-style procedurally generated world (surface, caves, depths, structures)
-- Factory automation that mirrors programming concepts
-- Progressive complexity unlocking as players advance
-- Educational stealth - kids learn programming by playing, not studying
+The ECS foundation (353 tests) exists but has no visual representation. Need a playable demo where players can move through the procedurally generated world, mine blocks, place blocks, and manage inventory.
 
 ## Requirements
 
-### Core Gameplay
-- [ ] Seed-based procedural world generation with distinct layers (surface, underground, deep)
-- [ ] Resource gathering (mining, harvesting) with tools
-- [ ] Tile-based world with destructible/placeable blocks
-- [ ] Inventory and crafting system
-- [ ] Machine placement and interaction
+### World Rendering
+- [ ] TileMapLayer displays generated terrain from TileWorld
+- [ ] Camera follows player with smooth movement
+- [ ] Visible chunk loading/unloading as player moves
+- [ ] Different tile visuals per block type (grass, stone, dirt, ores, etc.)
 
-### Automation/Programming System
-- [ ] Scratch-like drag-and-drop command blocks for machine programming
-- [ ] Simple chains initially (sequential execution)
-- [ ] Unlockable complexity: conditionals → loops → variables → functions
-- [ ] Visual feedback showing program execution
-- [ ] Miners and other machines that execute player-defined programs
+### Player
+- [ ] Player entity with sprite
+- [ ] WASD/arrow key movement (2D platformer or top-down TBD)
+- [ ] Mining interaction (click block to mine)
+- [ ] Block placement (select from hotbar, click to place)
+- [ ] Collision with solid blocks
 
-### World Generation
-- [ ] Deterministic generation from seed
-- [ ] Horizontal biomes with vertical layer progression
-- [ ] Ore deposits and resource nodes at appropriate depths
-- [ ] Generated structures (ruins, puzzle rooms, dungeons)
-- [ ] Support for "pocket dimensions" and multiple map layers
+### Inventory UI
+- [ ] Hotbar (9 slots) visible at bottom of screen
+- [ ] Number keys 1-9 select hotbar slot
+- [ ] Press key (Tab/I/E) to open full inventory grid
+- [ ] Visual slots showing item icons and stack counts
+- [ ] Click to select, click to place items
+- [ ] Inventory integrates with existing Inventory component
 
-### Architecture Requirements
-- [ ] Modular, composition-based design (no deep inheritance)
-- [ ] Data-driven content (JSON/resources for items, recipes, blocks)
-- [ ] Prepared for future multiplayer (authoritative game state)
-- [ ] Multi-layer world support (main world, pocket dimensions, space)
-- [ ] Teleportation and cross-layer resource sharing capability
-
-### Platform
-- Desktop only (PC/Mac)
-- Godot 4.x engine
-- Keyboard/mouse controls
+### Mining/Placement
+- [ ] Click on block to mine (uses TileWorld.set_block to AIR)
+- [ ] Mined items go to player inventory
+- [ ] Selected hotbar item can be placed
+- [ ] Placement only on valid adjacent positions
 
 ## Success Criteria
 
-- [ ] World generates deterministically from seed
-- [ ] Player can mine resources and place blocks
-- [ ] At least one programmable machine type works with command blocks
-- [ ] Command blocks execute visually with feedback
-- [ ] Save/load preserves world state and machine programs
-- [ ] Architecture supports adding new machine types via data files
-- [ ] Architecture supports multiple world layers (pocket dimensions)
+- [ ] Player spawns in generated world and can see terrain
+- [ ] Player can move with keyboard controls
+- [ ] Player can mine a block and see it disappear
+- [ ] Mined item appears in inventory
+- [ ] Player can place a block from inventory
+- [ ] Hotbar displays current items with counts
+- [ ] Full inventory opens/closes with key press
+- [ ] Camera follows player smoothly
+- [ ] World generates more terrain as player explores
 
 ## Constraints
 
-- Must use Godot 4.x (aligns with Voxel-factory)
-- Architecture must be extensible without code changes for new content
-- Performance: handle large worlds with many active machines
-- Single-player first, but state management must allow future multiplayer
-- No educational "branding" - learning should feel like natural gameplay
+- Must use existing ECS foundation (Entity, Component, System, TileWorld, Inventory, BlockData, ItemData)
+- Godot 4.x with TileMapLayer (not deprecated TileMap)
+- Use free Godot asset library sprites where possible
+- No multiplayer considerations yet
+- Desktop only (keyboard/mouse)
 
 ## Automated Testing (MANDATORY)
 
 > **For Claude:** Use `Skill(skill="workflows:dev-test")` for automation options.
 
-- **Framework:** GUT (Godot Unit Test) + integration tests
-- **Command:** `godot --headless -s addons/gut/gut_cmdline.gd`
+- **Framework:** GUT (existing)
+- **Command:** `/Applications/Godot.app/Contents/MacOS/Godot --headless -s addons/gut/gut_cmdln.gd`
 - **Core functionality to verify:**
-  - World generation produces consistent output from seed
-  - Command block execution follows correct sequence
-  - Save/load preserves machine state and programs
-  - Resource system correctly tracks inventory
+  - Player movement updates position
+  - Mining removes block from TileWorld and adds to Inventory
+  - Placement adds block to TileWorld and removes from Inventory
+  - Inventory UI reflects Inventory component state
+  - Camera position tracks player position
 
 ### What Counts as a Real Automated Test
 
-| ✅ REAL TEST (execute + verify) | ❌ NOT A TEST (never acceptable) |
+| REAL TEST (execute + verify) | NOT A TEST (never acceptable) |
 |---------------------------------|----------------------------------|
-| GUT test runs world gen, verifies tile at coordinates | grep finds WorldGenerator class |
-| Integration test executes command blocks, checks machine state | Check logs say "executed" |
-| Save/load test verifies data integrity | Read save file structure |
+| GUT test creates Player, calls move(), checks position changed | grep for Player class exists |
+| GUT test mines block, verifies TileWorld.get_block returns AIR | Check scene has TileMapLayer |
+| GUT test adds item, verifies InventoryUI slot count updates | "UI looks correct" |
+| Integration test: mine → inventory → place cycle | Log says "placed block" |
 
-## Exploration Findings (from Voxel-factory Analysis)
+## Exploration Findings
 
-### Machine/Automation Architecture
-- **Miner class** (`miner.gd`): State machine pattern with `MiningPhase` enum (DESCENDING → HORIZONTAL)
-- **Composition**: Miner owns `Inventory` component, not inherited
-- **Signal-based communication**: `mining_completed`, `depth_changed`, `active_changed`, `inventory_full`
-- **Configuration methods**: `set_target_depth()`, `set_horizontal_direction()` - program-like instructions
-- **No visual programming yet**: Current machines execute hardcoded algorithms, extensible via method calls
+### ECS Foundation Integration Points
+- `TileWorld.block_changed` signal - Connect to TileMapLayer for visual updates
+- `Inventory.inventory_updated` signal - Connect to InventoryUI for slot refresh
+- `BlockData.BlockType` enum - 15 block types (AIR=0 through BEDROCK=14)
+- `ItemData.ItemType` enum - Block items (1-8), Materials (20-25), Tools (40-48)
+- `Entity` extends Node2D - Add Player entity for scene tree integration
 
-### World Generation Patterns
-- **VoxelWorld** wraps godot_voxel module with `VoxelStreamRegionFiles` for persistence
-- **TerrainGenerator** uses Voronoi-based biome system via `BiomePlanner`
-- **Seed-based**: All `FastNoiseLite` generators seeded from `world_seed`
-- **Lazy generation**: Biomes only generated when player approaches (3x3 cell radius)
-- **Curve resources**: Per-biome height shaping via `.tres` Curve files
+### Key APIs for UI
+- `TileWorld.get_block(x, y)` - Query block type for rendering
+- `TileWorld.set_block(x, y, type)` - Modify world (emits signal)
+- `Inventory.get_slot(i)` - Returns {item: int, count: int}
+- `Inventory.add_item(type, count)` - Returns overflow count
+- `ItemData.get_item_name(type)` - Display name for UI labels
+- `ItemData.is_placeable(type)` - Check if item can be placed
+- `ItemData.get_block_for_item(type)` - Get BlockType for placement
+- `BlockData.get_block_drops(type)` - Get item drops for mining
 
-### Data-Driven Patterns
-- **BlockData/ItemData**: Static dictionaries with enum keys
-- **BiomeData**: Static `biome_params` dictionary with complete biome config
-- **VoxelBlockyLibrary**: External `.tres` resource for block meshes/materials
-- **CraftingSystem**: Static `recipes` array of dictionary patterns
+### Test Patterns
+- GUT framework with `watch_signals()` and `assert_signal_emitted()`
+- No scene/node testing yet - all RefCounted objects
+- Test command: `/Applications/Godot.app/Contents/MacOS/Godot --headless -s addons/gut/gut_cmdln.gd`
 
-### Composition Patterns
-- **Main.gd**: Dictionary-based registry (`miners: Dictionary = {}`) keyed by position
-- **Inventory**: `extends Resource` - reusable component owned by Player or Miner
-- **Signal connections**: All set up in `_ready()` for loose coupling
-- **No deep inheritance**: Classes extend Node3D/Resource directly
-
-### Test Infrastructure
-- **GUT framework** (Godot Unit Test) with `.gutconfig.json`
-- **Tests in**: `tests/unit/` and `tests/integration/`
-- **Mock pattern**: `MockVoxelWorld` with dictionary-based block storage
-- **Lifecycle hooks**: `before_all`, `after_each`, `autofree()` for cleanup
+### No Existing Scenes
+- `game/scenes/` directory exists but empty (only `ui/` subdirectory)
+- No `.tscn` files in project yet
+- No TileSet resources exist
 
 ## Clarified Requirements
 
-### 2D World Rendering
-- **Decision**: TileMapLayer (native Godot)
-- **Rationale**: Auto-culling, built-in collision, matches Terraria style
-- **Implementation**: Single TileMapLayer for main terrain, additional layers for pocket dimensions
+### View Style
+- Decision: Side-view platformer (Terraria-style)
+- Implications: Gravity, jumping, CharacterBody2D for player
+- Y-axis: Positive = up (surface at high Y, caves at low Y)
 
-### Command Block Programming Model
-- **Decision**: Flowchart/node graph (visual connections)
-- **Rationale**: Teaches data flow, more expressive than linear sequences
-- **Implementation**: Drag-and-drop nodes with visual wires connecting outputs to inputs
+### Chunk Size
+- Decision: 16x16 tiles per chunk
+- Rationale: Standard 2D chunk size, good performance balance
+- Note: Independent of BiomePlanner's 128x128 Voronoi cells
 
-### Program Execution
-- **Decision**: Tick-based execution (one command per game tick)
-- **Rationale**: Kids see each step execute, easier to debug, teaches sequential thinking
-- **Implementation**: Machine's `_process()` executes one node per tick, visual highlight on active node
+### Mining Range
+- Decision: 4-5 tile radius from player
+- Implementation: Calculate distance from player to clicked tile
+- Edge case: Show "too far" feedback if out of range
 
-### Biome Generation Architecture
-- **Decision**: Modular biome functions with shared noise core
-- **Rationale**: Easy biome-specific customization while maintaining consistency
-- **Implementation**:
-  - Shared: `_generate_base_terrain(x, y, params)` - noise-based height/density
-  - Per-biome: `generate_forest()`, `generate_desert()` - calls shared, adds macro features (temples, ice spikes)
-  - Biomes configured via data dictionaries like Voxel-factory's BiomeData
+### Mining Style
+- Decision: Instant break on click (for demo), eventually to be gated behind axe tech level (e.g. steel axe needed to break bedrock+ hardness blocks)
+- Rationale: Faster iteration, hardness values can be used later when tool tech is explored further
+- Future: Add hold-to-mine with progress bar when polishing, add hardness and tool checks
 
-### Pocket Dimensions
-- **Decision**: TileMapLayers (same scene, different layers)
-- **Rationale**: Simpler architecture, all layers share coordinates, no loading screens
-- **Implementation**: `DimensionManager` toggles layer visibility, each layer can have different tile sources
+## Open Questions
 
-### Machine Item Transfer
-- **Decision**: Conveyor belts (Factorio-style)
-- **Rationale**: Visual item flow teaches logistics, kids see resources moving
-- **Implementation**: Belt tiles with direction, items as sprites moving along belt path
-
-## Open Questions (Remaining)
-
-- [ ] Chunk size for TileMapLayer streaming (16x16 recommended for 2D)
-- [ ] Node graph UI library (custom vs existing addon)
+- Specific asset pack to use from Godot Asset Library?
