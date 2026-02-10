@@ -50,7 +50,10 @@ func _ready() -> void:
 
 func _spawn_player_above_terrain() -> void:
 	var surface_y = _find_surface_y(PLAYER_SPAWN_X)
-	player.position = Vector2(PLAYER_SPAWN_X * TILE_SIZE, (surface_y - 2) * TILE_SIZE)
+	# Negate Y because Godot screen Y is down, but world Y is up (altitude)
+	# surface_y + 2 places player 2 tiles above the surface in world coords
+	# Negating converts to screen coords where negative Y is up
+	player.position = Vector2(PLAYER_SPAWN_X * TILE_SIZE, -(surface_y + 2) * TILE_SIZE)
 
 
 func _find_surface_y(x: int) -> int:

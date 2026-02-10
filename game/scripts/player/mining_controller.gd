@@ -82,9 +82,11 @@ func is_in_range(world_position: Vector2) -> bool:
 
 
 func world_to_tile(world_pos: Vector2) -> Vector2i:
+	## Convert screen position to tile coordinates
+	## Negate Y because screen Y is down but tile world Y is up (altitude)
 	return Vector2i(
 		int(floor(world_pos.x / TILE_SIZE)),
-		int(floor(world_pos.y / TILE_SIZE))
+		int(floor(-world_pos.y / TILE_SIZE))
 	)
 
 

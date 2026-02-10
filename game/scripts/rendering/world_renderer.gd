@@ -47,11 +47,13 @@ func set_tile_world(world: TileWorld) -> void:
 
 func _on_block_changed(pos: Vector2i, _old_type: int, new_type: int) -> void:
 	## Update TileMapLayer when a block changes in TileWorld
+	## Negate Y because Godot screen Y is down, but world Y is up (altitude)
+	var screen_pos := Vector2i(pos.x, -pos.y)
 	if new_type == BlockData.BlockType.AIR:
-		tile_map_layer.erase_cell(pos)
+		tile_map_layer.erase_cell(screen_pos)
 	else:
 		# BlockType value maps directly to atlas X coordinate
-		tile_map_layer.set_cell(pos, TILE_SOURCE_ID, Vector2i(new_type, 0))
+		tile_map_layer.set_cell(screen_pos, TILE_SOURCE_ID, Vector2i(new_type, 0))
 
 
 func render_region(start: Vector2i, end: Vector2i) -> void:
@@ -63,10 +65,12 @@ func render_region(start: Vector2i, end: Vector2i) -> void:
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var block_type = tile_world.get_block(x, y)
+			## Negate Y because Godot screen Y is down, but world Y is up (altitude)
+			var screen_pos := Vector2i(x, -y)
 			if block_type == BlockData.BlockType.AIR:
-				tile_map_layer.erase_cell(Vector2i(x, y))
+				tile_map_layer.erase_cell(screen_pos)
 			else:
-				tile_map_layer.set_cell(Vector2i(x, y), TILE_SOURCE_ID, Vector2i(block_type, 0))
+				tile_map_layer.set_cell(screen_pos, TILE_SOURCE_ID, Vector2i(block_type, 0))
 
 
 func clear() -> void:

@@ -1,13 +1,13 @@
-[gd_scene load_steps=8 format=3 uid="uid://bvxk2r4m6c5qa"]
+[gd_scene load_steps=9 format=3 uid="uid://bvxk2r4m6c5qa"]
 
-[ext_resource type="Script" path="res://game/scripts/main.gd" id="1_main"]
-[ext_resource type="Script" path="res://game/scripts/rendering/world_renderer.gd" id="2_renderer"]
-[ext_resource type="PackedScene" uid="uid://player_scene" path="res://game/scenes/player.tscn" id="3_player"]
-[ext_resource type="Script" path="res://game/scripts/player/input_manager.gd" id="4_input_manager"]
-[ext_resource type="Script" path="res://game/scripts/player/mining_controller.gd" id="5_mining_controller"]
-[ext_resource type="Script" path="res://game/scripts/player/placement_controller.gd" id="6_placement_controller"]
-[ext_resource type="Script" path="res://game/scripts/ui/hotbar_ui.gd" id="7_hotbar_ui"]
-[ext_resource type="Script" path="res://game/scripts/ui/inventory_ui.gd" id="8_inventory_ui"]
+[ext_resource type="Script" uid="uid://bnv7id5xx1656" path="res://game/scripts/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://b7wuulkoyytj2" path="res://game/scripts/rendering/world_renderer.gd" id="2_renderer"]
+[ext_resource type="PackedScene" path="res://game/scenes/player.tscn" id="3_player"]
+[ext_resource type="Script" uid="uid://c2tlc18nky06c" path="res://game/scripts/player/input_manager.gd" id="4_input_manager"]
+[ext_resource type="Script" uid="uid://ccikwm45c0wv8" path="res://game/scripts/player/mining_controller.gd" id="5_mining_controller"]
+[ext_resource type="Script" uid="uid://bkgc1f2uawsps" path="res://game/scripts/player/placement_controller.gd" id="6_placement_controller"]
+[ext_resource type="Script" uid="uid://culfwwda34j6v" path="res://game/scripts/ui/hotbar_ui.gd" id="7_hotbar_ui"]
+[ext_resource type="Script" uid="uid://dnq2c360rifwy" path="res://game/scripts/ui/inventory_ui.gd" id="8_inventory_ui"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")

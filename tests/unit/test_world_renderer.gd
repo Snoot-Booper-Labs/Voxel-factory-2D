@@ -173,19 +173,20 @@ func test_set_tile_world_disconnects_previous():
 
 func test_on_block_changed_updates_tile_map_layer():
 	# When block_changed is emitted, TileMapLayer should be updated
+	# Note: WorldRenderer negates Y for screen coords (screen Y down, world Y up)
 	var renderer = _create_test_renderer()
 
 	var tile_world = TileWorld.new(12345)
 	renderer.set_tile_world(tile_world)
 
-	# Set a block
+	# Set a block at world pos (5, 5)
 	tile_world.set_block(5, 5, BlockData.BlockType.STONE)
 
-	# Verify TileMapLayer was updated
-	var cell_source_id = renderer.tile_map_layer.get_cell_source_id(Vector2i(5, 5))
+	# Verify TileMapLayer was updated at screen pos (5, -5)
+	var cell_source_id = renderer.tile_map_layer.get_cell_source_id(Vector2i(5, -5))
 	assert_eq(cell_source_id, 0, "Cell should have source ID 0")
 
-	var atlas_coords = renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(5, 5))
+	var atlas_coords = renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(5, -5))
 	assert_eq(atlas_coords, Vector2i(BlockData.BlockType.STONE, 0),
 		"Atlas coords should match BlockType")
 
@@ -194,23 +195,24 @@ func test_on_block_changed_updates_tile_map_layer():
 
 func test_on_block_changed_erases_air_blocks():
 	# Setting block to AIR should erase the cell
+	# Note: WorldRenderer negates Y for screen coords (screen Y down, world Y up)
 	var renderer = _create_test_renderer()
 
 	var tile_world = TileWorld.new(12345)
 	renderer.set_tile_world(tile_world)
 
-	# Set a block first
+	# Set a block first at world pos (10, 10)
 	tile_world.set_block(10, 10, BlockData.BlockType.DIRT)
 
-	# Verify it's set
-	var cell_source_id = renderer.tile_map_layer.get_cell_source_id(Vector2i(10, 10))
+	# Verify it's set at screen pos (10, -10)
+	var cell_source_id = renderer.tile_map_layer.get_cell_source_id(Vector2i(10, -10))
 	assert_eq(cell_source_id, 0, "Cell should be set")
 
 	# Set to AIR
 	tile_world.set_block(10, 10, BlockData.BlockType.AIR)
 
 	# Cell should be erased (source_id = -1)
-	cell_source_id = renderer.tile_map_layer.get_cell_source_id(Vector2i(10, 10))
+	cell_source_id = renderer.tile_map_layer.get_cell_source_id(Vector2i(10, -10))
 	assert_eq(cell_source_id, -1, "Cell should be erased for AIR")
 
 	renderer.queue_free()
@@ -218,29 +220,31 @@ func test_on_block_changed_erases_air_blocks():
 
 func test_on_block_changed_multiple_blocks():
 	# Should handle multiple block changes
+	# Note: WorldRenderer negates Y for screen coords (screen Y down, world Y up)
 	var renderer = _create_test_renderer()
 
 	var tile_world = TileWorld.new(12345)
 	renderer.set_tile_world(tile_world)
 
-	# Set multiple blocks
+	# Set multiple blocks at world Y=0, screen Y=0 (0 negated is still 0)
 	tile_world.set_block(0, 0, BlockData.BlockType.GRASS)
 	tile_world.set_block(1, 0, BlockData.BlockType.DIRT)
 	tile_world.set_block(2, 0, BlockData.BlockType.STONE)
 
-	# Verify all were updated
+	# Verify all were updated (Y=0 -> screen Y=0)
 	assert_eq(renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(0, 0)),
-		Vector2i(BlockData.BlockType.GRASS, 0), "GRASS should be at (1, 0)")
+		Vector2i(BlockData.BlockType.GRASS, 0), "GRASS should be at screen (0, 0)")
 	assert_eq(renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(1, 0)),
-		Vector2i(BlockData.BlockType.DIRT, 0), "DIRT should be at (2, 0)")
+		Vector2i(BlockData.BlockType.DIRT, 0), "DIRT should be at screen (1, 0)")
 	assert_eq(renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(2, 0)),
-		Vector2i(BlockData.BlockType.STONE, 0), "STONE should be at (3, 0)")
+		Vector2i(BlockData.BlockType.STONE, 0), "STONE should be at screen (2, 0)")
 
 	renderer.queue_free()
 
 
 func test_on_block_changed_all_block_types():
 	# Should correctly map all BlockType values to atlas coords
+	# Note: WorldRenderer negates Y for screen coords (screen Y down, world Y up)
 	var renderer = _create_test_renderer()
 
 	var tile_world = TileWorld.new(12345)
@@ -265,6 +269,7 @@ func test_on_block_changed_all_block_types():
 
 	for i in range(block_types.size()):
 		var block_type = block_types[i]
+		# Set at world Y=0, which maps to screen Y=0
 		tile_world.set_block(i, 0, block_type)
 
 		var atlas_coords = renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(i, 0))
@@ -280,12 +285,13 @@ func test_on_block_changed_all_block_types():
 
 func test_render_region_renders_blocks():
 	# render_region should render all blocks in the specified region
+	# Note: WorldRenderer negates Y for screen coords (screen Y down, world Y up)
 	var renderer = _create_test_renderer()
 
 	var tile_world = TileWorld.new(12345)
 	renderer.set_tile_world(tile_world)
 
-	# Pre-set some blocks
+	# Pre-set some blocks at world Y=0 -> screen Y=0
 	tile_world.set_block(0, 0, BlockData.BlockType.STONE)
 	tile_world.set_block(1, 0, BlockData.BlockType.DIRT)
 
@@ -295,10 +301,10 @@ func test_render_region_renders_blocks():
 	# Verify cleared
 	assert_eq(renderer.tile_map_layer.get_cell_source_id(Vector2i(0, 0)), -1, "Should be cleared")
 
-	# Render region
+	# Render region at world coords
 	renderer.render_region(Vector2i(0, 0), Vector2i(1, 0))
 
-	# Verify rendered
+	# Verify rendered at screen coords (Y=0 -> screen Y=0)
 	assert_eq(renderer.tile_map_layer.get_cell_source_id(Vector2i(0, 0)), 0, "Should be rendered")
 	assert_eq(renderer.tile_map_layer.get_cell_source_id(Vector2i(1, 0)), 0, "Should be rendered")
 
@@ -307,20 +313,21 @@ func test_render_region_renders_blocks():
 
 func test_render_region_skips_air():
 	# render_region should not render AIR blocks
+	# Note: WorldRenderer negates Y for screen coords (screen Y down, world Y up)
 	var renderer = _create_test_renderer()
 
 	var tile_world = TileWorld.new(12345)
 	renderer.set_tile_world(tile_world)
 
-	# Set an AIR block
+	# Set an AIR block at world Y=100
 	tile_world.set_block(0, 100, BlockData.BlockType.AIR)
 
 	# Clear and render
 	renderer.clear()
 	renderer.render_region(Vector2i(0, 100), Vector2i(0, 100))
 
-	# AIR should not be rendered
-	assert_eq(renderer.tile_map_layer.get_cell_source_id(Vector2i(0, 100)), -1,
+	# AIR should not be rendered at screen Y=-100
+	assert_eq(renderer.tile_map_layer.get_cell_source_id(Vector2i(0, -100)), -1,
 		"AIR should not be rendered")
 
 	renderer.queue_free()
@@ -346,22 +353,23 @@ func test_render_region_does_nothing_without_tile_world():
 
 func test_clear_removes_all_tiles():
 	# clear should remove all tiles from TileMapLayer
+	# Note: WorldRenderer negates Y for screen coords (screen Y down, world Y up)
 	var renderer = _create_test_renderer()
 
 	var tile_world = TileWorld.new(12345)
 	renderer.set_tile_world(tile_world)
 
-	# Set some blocks
+	# Set some blocks at world coords
 	tile_world.set_block(0, 0, BlockData.BlockType.STONE)
 	tile_world.set_block(5, 5, BlockData.BlockType.DIRT)
 
 	# Clear
 	renderer.clear()
 
-	# Verify cleared
+	# Verify cleared at screen coords (world Y=0 -> screen Y=0, world Y=5 -> screen Y=-5)
 	assert_eq(renderer.tile_map_layer.get_cell_source_id(Vector2i(0, 0)), -1,
 		"Cell should be cleared")
-	assert_eq(renderer.tile_map_layer.get_cell_source_id(Vector2i(5, 5)), -1,
+	assert_eq(renderer.tile_map_layer.get_cell_source_id(Vector2i(5, -5)), -1,
 		"Cell should be cleared")
 
 	renderer.queue_free()
@@ -373,22 +381,23 @@ func test_clear_removes_all_tiles():
 
 func test_full_workflow():
 	# Test complete workflow: create, connect, set blocks, verify
+	# Note: WorldRenderer negates Y for screen coords (screen Y down, world Y up)
 	var renderer = _create_test_renderer()
 
 	var tile_world = TileWorld.new(12345)
 	renderer.set_tile_world(tile_world)
 
-	# Set blocks of different types
+	# Set blocks of different types at world coords (0, 0), (0, 1), (0, 2)
 	tile_world.set_block(0, 0, BlockData.BlockType.GRASS)
 	tile_world.set_block(0, 1, BlockData.BlockType.DIRT)
 	tile_world.set_block(0, 2, BlockData.BlockType.STONE)
 
-	# Verify all are rendered correctly
+	# Verify all are rendered correctly at screen coords (0, 0), (0, -1), (0, -2)
 	assert_eq(renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(0, 0)),
 		Vector2i(BlockData.BlockType.GRASS, 0), "GRASS rendered correctly")
-	assert_eq(renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(0, 1)),
+	assert_eq(renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(0, -1)),
 		Vector2i(BlockData.BlockType.DIRT, 0), "DIRT rendered correctly")
-	assert_eq(renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(0, 2)),
+	assert_eq(renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(0, -2)),
 		Vector2i(BlockData.BlockType.STONE, 0), "STONE rendered correctly")
 
 	# Change a block
@@ -398,7 +407,7 @@ func test_full_workflow():
 
 	# Remove a block (set to AIR)
 	tile_world.set_block(0, 1, BlockData.BlockType.AIR)
-	assert_eq(renderer.tile_map_layer.get_cell_source_id(Vector2i(0, 1)), -1,
+	assert_eq(renderer.tile_map_layer.get_cell_source_id(Vector2i(0, -1)), -1,
 		"Removed block should have no cell")
 
 	renderer.queue_free()
@@ -406,16 +415,17 @@ func test_full_workflow():
 
 func test_negative_coordinates():
 	# WorldRenderer should handle negative coordinates
+	# Note: WorldRenderer negates Y for screen coords (screen Y down, world Y up)
 	var renderer = _create_test_renderer()
 
 	var tile_world = TileWorld.new(12345)
 	renderer.set_tile_world(tile_world)
 
-	# Set block at negative coordinates
+	# Set block at negative world coordinates (-5, -10)
 	tile_world.set_block(-5, -10, BlockData.BlockType.COBBLESTONE)
 
-	# Verify rendered
-	var atlas_coords = renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(-5, -10))
+	# Verify rendered at screen coords (-5, 10) since screen Y = -world Y
+	var atlas_coords = renderer.tile_map_layer.get_cell_atlas_coords(Vector2i(-5, 10))
 	assert_eq(atlas_coords, Vector2i(BlockData.BlockType.COBBLESTONE, 0),
 		"Should handle negative coordinates")
 
