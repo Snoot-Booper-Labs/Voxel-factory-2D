@@ -10,7 +10,7 @@ func _create_test_tileset() -> TileSet:
 	# Create an atlas source with a placeholder texture
 	var atlas = TileSetAtlasSource.new()
 	var texture = PlaceholderTexture2D.new()
-	texture.size = Vector2i(256, 16)  # 16 tiles wide, 1 tile tall
+	texture.size = Vector2i(256, 16) # 16 tiles wide, 1 tile tall
 	atlas.texture = texture
 	atlas.texture_region_size = Vector2i(16, 16)
 
@@ -18,7 +18,7 @@ func _create_test_tileset() -> TileSet:
 	for i in range(15):
 		atlas.create_tile(Vector2i(i, 0))
 
-	tileset.add_source(atlas, 0)  # Source ID 0
+	tileset.add_source(atlas, 0) # Source ID 0
 	return tileset
 
 
@@ -344,6 +344,68 @@ func test_render_region_does_nothing_without_tile_world():
 	# Just checking it didn't crash
 	assert_true(true, "render_region should not crash without tile_world")
 
+	renderer.queue_free()
+
+
+# =============================================================================
+# Dynamic Chunk Loading Tests
+# =============================================================================
+
+func test_set_tracking_target_updates_chunks():
+	# set_tracking_target should trigger chunk loading around the target
+	var renderer = _create_test_renderer()
+	var tile_world = TileWorld.new(12345)
+	renderer.set_tile_world(tile_world)
+
+	var target = Node2D.new()
+	# Position at (0, 0)
+	target.global_position = Vector2.ZERO
+
+	watch_signals(renderer)
+	renderer.set_tracking_target(target)
+
+	# Manually call _process because we are in a unit test
+	renderer._process(0.1)
+
+	# Should load chunk (0, 0) and surrounding radius
+	# Radius is 5, so checks -5 to 5.
+	assert_signal_emitted(renderer, "chunk_loaded", "Should emit chunk_loaded")
+
+	# Check if chunk (0, 0) was loaded
+	assert_true(renderer._loaded_chunks.has(Vector2i(0, 0)), "Center chunk should be loaded")
+
+	target.free()
+	renderer.queue_free()
+
+
+func test_moving_target_loads_new_chunks():
+	# moving target should load new chunks and unload old ones
+	var renderer = _create_test_renderer()
+	var tile_world = TileWorld.new(12345)
+	renderer.set_tile_world(tile_world)
+
+	var target = Node2D.new()
+	target.global_position = Vector2.ZERO
+	renderer.set_tracking_target(target)
+	renderer._process(0.1)
+
+	# Move target far away (e.g. 20 chunks away)
+	# Chunk size 16 * 16 pixels = 256 pixels
+	# Move 20 chunks right = 20 * 256 = 5120 pixels
+	target.global_position = Vector2(5120, 0)
+
+	watch_signals(renderer)
+	renderer._process(0.1)
+
+	# Should have loaded new chunks
+	var new_center = Vector2i(20, 0)
+	assert_true(renderer._loaded_chunks.has(new_center), "New center chunk should be loaded")
+
+	# Should have unloaded old chunks (0, 0)
+	assert_signal_emitted(renderer, "chunk_unloaded", "Should emit chunk_unloaded")
+	assert_false(renderer._loaded_chunks.has(Vector2i(0, 0)), "Old center chunk should be unloaded")
+
+	target.free()
 	renderer.queue_free()
 
 

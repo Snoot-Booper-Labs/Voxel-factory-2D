@@ -7,6 +7,8 @@
 
 ## Completed Tracks
 
+- [Dynamic Chunk Loading](./tracks/dynamic-chunk-loading/index.md) - Implement continuous world loading around the player.
+
 *(None yet)*
 
 ## Future Tracks

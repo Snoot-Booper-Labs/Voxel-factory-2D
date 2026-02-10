@@ -8,11 +8,11 @@ var hotbar_ui: HotbarUI
 var inventory_ui: InventoryUI
 
 func setup(player: PlayerController, mining: MiningController, placement: PlacementController, hotbar: HotbarUI, inv_ui: InventoryUI) -> void:
-    player_controller = player
-    mining_controller = mining
-    placement_controller = placement
-    hotbar_ui = hotbar
-    inventory_ui = inv_ui
+	player_controller = player
+	mining_controller = mining
+	placement_controller = placement
+	hotbar_ui = hotbar
+	inventory_ui = inv_ui
 
 func _process(_delta: float) -> void:
 	if player_controller:

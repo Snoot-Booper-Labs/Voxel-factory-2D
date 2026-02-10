@@ -28,10 +28,7 @@ func _ready() -> void:
 
 	# Setup world renderer
 	world_renderer.set_tile_world(tile_world)
-
-	# Render initial area
-	var half = INITIAL_RENDER_SIZE / 2
-	world_renderer.render_region(Vector2i(-half, -half), Vector2i(half, half))
+	world_renderer.set_tracking_target(player)
 
 	# Setup controllers
 	mining_controller.setup(tile_world, inventory)
@@ -53,7 +50,7 @@ func _spawn_player_above_terrain() -> void:
 	# Negate Y because Godot screen Y is down, but world Y is up (altitude)
 	# surface_y + 2 places player 2 tiles above the surface in world coords
 	# Negating converts to screen coords where negative Y is up
-	player.position = Vector2(PLAYER_SPAWN_X * TILE_SIZE, -(surface_y + 2) * TILE_SIZE)
+	player.position = Vector2(PLAYER_SPAWN_X * TILE_SIZE, - (surface_y + 2) * TILE_SIZE)
 
 
 func _find_surface_y(x: int) -> int:

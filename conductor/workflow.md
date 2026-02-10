@@ -8,5 +8,33 @@
 4.  **Refactor**: Clean up the code (Refactor).
 5.  **Verify**: Run the full suite.
 
+## Track Completion & Merging
+
+**CRITICAL: Human in the Loop (HITL) Policy**
+Before merging any feature branch into `main`:
+
+1.  **Automated Tests**: All automated tests (unit + integration) must pass.
+2.  **Manual Verification**: Ask the HUMAN user to manually test the feature in the game.
+3.  **Approval**: WAIT for explicit user confirmation that the feature works as intended.
+    - If issues are found, return to the Development Loop.
+    - Only after explicit approval, merge the branch.
+
 ## Testing
-Always run tests using the headless command.
+
+### Command Format
+Always use the headless command.
+**CRITICAL**: When specifying a test file or directory, you **MUST** use the `res://` prefix.
+
+**Correct:**
+`..\engine\Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/unit/test_foo.gd`
+
+**Incorrect:**
+`..\engine\Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=tests/unit/test_foo.gd`
+
+### Command Components
+- **Executable**: `..\engine\Godot_v4.6-stable_win64_console.exe`
+- **Headless flag**: `--headless`
+- **Script flag**: `-s addons/gut/gut_cmdln.gd`
+- **Test filter**:
+    - Specific file: `-gtest=res://tests/unit/test_name.gd`
+    - Directory: `-gdir=res://tests/unit/`
