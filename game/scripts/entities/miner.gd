@@ -49,7 +49,7 @@ func _process_moving(delta: float) -> void:
 		position = _target_pos
 
 		# Determine next tile
-		var tile_pos = _world_to_tile(position)
+		var tile_pos = WorldUtils.world_to_tile(position)
 		var next_tile_pos = tile_pos + direction
 		# Visuals are 2 tiles wide, so the "front" is actually position + direction * 2?
 		# Actually, if the miner is 2 blocks wide (0,0 and 1,0 relative), and moves right:
@@ -78,12 +78,12 @@ func _process_moving(delta: float) -> void:
 			_start_mining(mine_target)
 		else:
 			# Free to move
-			_target_pos = position + Vector2(direction) * 16.0
+			_target_pos = position + Vector2(direction) * float(WorldUtils.TILE_SIZE)
 
 
 	# Move towards target
 	if position.distance_to(_target_pos) > 0.1:
-		var speed = 16.0 / data.move_speed if data else 4.0
+		var speed = float(WorldUtils.TILE_SIZE) / data.move_speed if data else 4.0
 		position = position.move_toward(_target_pos, speed * delta)
 
 
@@ -131,14 +131,6 @@ func _complete_mining(block_type: int) -> void:
 
 	# Resume moving
 	_state = State.MOVING
-
-
-# Helper to convert world position to tile coordinates
-func _world_to_tile(world_pos: Vector2) -> Vector2i:
-	return Vector2i(
-		int(floor(world_pos.x / 16.0)),
-		- int(floor(world_pos.y / 16.0))
-	)
 
 ## Returns the Inventory component
 func get_inventory() -> Inventory:

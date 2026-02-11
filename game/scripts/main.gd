@@ -16,7 +16,6 @@ var inventory: Inventory
 @onready var placement_controller: PlacementController = $PlacementController
 
 const WORLD_SEED = 12345
-const TILE_SIZE = 16
 const INITIAL_RENDER_SIZE = 64
 const PLAYER_SPAWN_X = 0
 
@@ -52,7 +51,7 @@ func _spawn_player_above_terrain() -> void:
 	# Negate Y because Godot screen Y is down, but world Y is up (altitude)
 	# surface_y + 2 places player 2 tiles above the surface in world coords
 	# Negating converts to screen coords where negative Y is up
-	player.position = Vector2(PLAYER_SPAWN_X * TILE_SIZE, - (surface_y + 2) * TILE_SIZE)
+	player.position = Vector2(PLAYER_SPAWN_X * WorldUtils.TILE_SIZE, - (surface_y + 2) * WorldUtils.TILE_SIZE)
 
 
 func _find_surface_y(x: int) -> int:

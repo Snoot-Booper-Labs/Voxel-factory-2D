@@ -7,7 +7,6 @@ extends Node
 signal block_mined(position: Vector2i, block_type: int)
 
 const MINING_RANGE: float = 80.0 # 5 tiles * 16 pixels
-const TILE_SIZE: int = 16
 
 var tile_world: TileWorld
 var inventory: Inventory
@@ -51,7 +50,7 @@ func try_mine_at(world_position: Vector2) -> bool:
 		return false
 
 	# Convert to tile coordinates
-	var tile_pos = world_to_tile(world_position)
+	var tile_pos = WorldUtils.world_to_tile(world_position)
 
 	# Get block type
 	var block_type = tile_world.get_block(tile_pos.x, tile_pos.y)
@@ -78,15 +77,6 @@ func try_mine_at(world_position: Vector2) -> bool:
 
 func is_in_range(world_position: Vector2) -> bool:
 	return player_position.distance_to(world_position) <= MINING_RANGE
-
-
-func world_to_tile(world_pos: Vector2) -> Vector2i:
-	## Convert screen position to tile coordinates
-	## Negate Y because screen Y is down but tile world Y is up (altitude)
-	return Vector2i(
-		int(floor(world_pos.x / TILE_SIZE)),
-		- int(floor(world_pos.y / TILE_SIZE))
-	)
 
 
 static func _get_item_type_from_name(item_name: String) -> int:

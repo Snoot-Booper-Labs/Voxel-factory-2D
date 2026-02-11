@@ -7,7 +7,6 @@ extends Node
 signal block_placed(position: Vector2i, block_type: int)
 
 const PLACEMENT_RANGE: float = 80.0 # 5 tiles * 16 pixels
-const TILE_SIZE: int = 16
 
 var tile_world: TileWorld
 var inventory: Inventory
@@ -47,7 +46,7 @@ func try_place_at(world_position: Vector2) -> bool:
 		return false
 
 	# Convert to tile coordinates
-	var tile_pos = world_to_tile(world_position)
+	var tile_pos = WorldUtils.world_to_tile(world_position)
 
 	# Check if mining/entity placement logic applies
 	if ItemData.is_entity(slot_data.item):
@@ -73,7 +72,7 @@ func try_place_at(world_position: Vector2) -> bool:
 
 func _try_place_entity(item_type: int, world_pos: Vector2) -> bool:
 	if item_type == ItemData.ItemType.MINER:
-		var tile_pos = world_to_tile(world_pos)
+		var tile_pos = WorldUtils.world_to_tile(world_pos)
 
 		# Check if space is clear (2 blocks wide) -> Wait, entities can overlap blocks?
 		# Prompt says "placed down should mine straight left or right".
@@ -111,7 +110,7 @@ func _try_place_entity(item_type: int, world_pos: Vector2) -> bool:
 			# tile * 16 is top-left.
 			# Miner scene visuals are 0,0 to 32,16.
 			# Let's place at tile_pos * 16. Y is inverted.
-			var spawn_pos = Vector2(tile_pos.x * 16.0, -tile_pos.y * 16.0)
+			var spawn_pos = WorldUtils.tile_to_world(tile_pos)
 
 			if miner.has_method("setup"):
 				miner.setup(tile_world, spawn_pos, direction)
@@ -125,15 +124,6 @@ func _try_place_entity(item_type: int, world_pos: Vector2) -> bool:
 
 func is_in_range(world_position: Vector2) -> bool:
 	return player_position.distance_to(world_position) <= PLACEMENT_RANGE
-
-
-func world_to_tile(world_pos: Vector2) -> Vector2i:
-	## Convert screen position to tile coordinates
-	## Negate Y because screen Y is down but tile world Y is up (altitude)
-	return Vector2i(
-		int(floor(world_pos.x / TILE_SIZE)),
-		- int(floor(world_pos.y / TILE_SIZE))
-	)
 
 
 func get_selected_item() -> int:

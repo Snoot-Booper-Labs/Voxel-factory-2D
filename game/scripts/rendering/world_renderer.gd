@@ -56,9 +56,7 @@ func _on_block_changed(pos: Vector2i, _old_type: int, new_type: int) -> void:
 		tile_map_layer.set_cell(screen_pos, TILE_SOURCE_ID, Vector2i(new_type, 0))
 
 
-const CHUNK_SIZE: int = 16
 const RENDER_DISTANCE: int = 5 # Radius in chunks
-const TILE_SIZE: int = 16 # Matches project settings
 
 var tracking_target: Node2D
 var _loaded_chunks: Dictionary = {} # Vector2i -> bool
@@ -72,7 +70,7 @@ func _process(_delta: float) -> void:
 	if tracking_target == null or tile_world == null:
 		return
 
-	var current_chunk = _get_chunk_coords(tracking_target.global_position)
+	var current_chunk = WorldUtils.world_to_chunk(tracking_target.global_position)
 
 	if current_chunk != _last_chunk_pos:
 		_update_chunks(current_chunk)
@@ -83,19 +81,6 @@ func set_tracking_target(target: Node2D) -> void:
 	tracking_target = target
 	# Force update
 	_last_chunk_pos = Vector2i(999999, 999999)
-
-
-func _get_chunk_coords(world_pos: Vector2) -> Vector2i:
-	# World Y is up (positive), Screen Y is down (positive).
-	# Tile coordinates: x = floor(world_x / 16), y = floor(-world_y / 16)
-	var tile_x = floor(world_pos.x / TILE_SIZE)
-	# Negate Y because Godot screen Y is down, but world Y is up (altitude)
-	var tile_y = floor(-world_pos.y / TILE_SIZE)
-
-	return Vector2i(
-		int(floor(tile_x / CHUNK_SIZE)),
-		int(floor(tile_y / CHUNK_SIZE))
-	)
 
 
 func _update_chunks(center_chunk: Vector2i) -> void:
@@ -123,19 +108,19 @@ func _update_chunks(center_chunk: Vector2i) -> void:
 
 func _load_chunk(chunk_pos: Vector2i) -> void:
 	_loaded_chunks[chunk_pos] = true
-	var start = chunk_pos * CHUNK_SIZE
-	var end = start + Vector2i(CHUNK_SIZE - 1, CHUNK_SIZE - 1)
+	var start = chunk_pos * WorldUtils.CHUNK_SIZE
+	var end = start + Vector2i(WorldUtils.CHUNK_SIZE - 1, WorldUtils.CHUNK_SIZE - 1)
 	render_region(start, end)
 	chunk_loaded.emit(chunk_pos)
 
 
 func _unload_chunk(chunk_pos: Vector2i) -> void:
 	_loaded_chunks.erase(chunk_pos)
-	var start_tile = chunk_pos * CHUNK_SIZE
+	var start_tile = chunk_pos * WorldUtils.CHUNK_SIZE
 
 	# Clear the cells in this chunk
-	for y in range(CHUNK_SIZE):
-		for x in range(CHUNK_SIZE):
+	for y in range(WorldUtils.CHUNK_SIZE):
+		for x in range(WorldUtils.CHUNK_SIZE):
 			var tile_pos = start_tile + Vector2i(x, y)
 			# Convert to screen coordinates
 			var screen_pos = Vector2i(tile_pos.x, -tile_pos.y)
