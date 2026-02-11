@@ -2,7 +2,7 @@
 
 ## Active Tracks
 
-*(None yet)*
+- [Editor UI UX](./tracks/editor-ui-ux/index.md) - Improve the Godot Editor experience for the game UI and Player entity.
 
 ## Completed Tracks
 

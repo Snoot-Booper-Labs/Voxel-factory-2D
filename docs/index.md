@@ -1,6 +1,9 @@
 # Program Builder - Documentation
 
-Welcome to the Program Builder documentation.
+Welcome to the Program Builder documentation. 
+
+**Management:** [Project Conductor Index](../conductor/index.md) - Project management and planning system.
+
 
 ## Guides
 

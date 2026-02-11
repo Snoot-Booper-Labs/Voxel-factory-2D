@@ -1,6 +1,7 @@
 # Conductor Index
 
-This is the main entry point for the project documentation and management system.
+This is the main entry point for the project documentation and management system. The **Conductor extension** (`~\.gemini\extensions\conductor`) is mandatory for all development tasks.
+
 
 ## Project Context
 

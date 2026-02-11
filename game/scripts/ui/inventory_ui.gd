@@ -1,3 +1,4 @@
+@tool
 class_name InventoryUI
 extends Control
 ## Full inventory grid panel
@@ -13,11 +14,15 @@ const SLOT_MARGIN: int = 4
 var inventory: Inventory
 var _slot_panels: Array[Panel] = []
 var _slot_labels: Array[Label] = []
+var _name_labels: Array[Label] = []
 var _is_open: bool = false
 
 
 func _ready() -> void:
-	visible = false
+	if not Engine.is_editor_hint():
+		visible = false
+	else:
+		visible = true
 	_create_grid()
 
 
@@ -32,6 +37,13 @@ func setup(inv: Inventory) -> void:
 
 
 func _create_grid() -> void:
+	# Clear existing children to prevent duplicates in tool mode
+	for child in get_children():
+		child.queue_free()
+	_slot_panels.clear()
+	_slot_labels.clear()
+	_name_labels.clear()
+
 	# Create centered panel background
 	var background = Panel.new()
 	background.name = "Background"
@@ -54,6 +66,16 @@ func _create_grid() -> void:
 		grid.add_child(panel)
 		_slot_panels.append(panel)
 
+		# Add label for name
+		var name_label = Label.new()
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		name_label.anchors_preset = Control.PRESET_FULL_RECT
+		name_label.add_theme_font_size_override("font_size", 10)
+		panel.add_child(name_label)
+		_name_labels.append(name_label)
+
 		# Add label for count
 		var label = Label.new()
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -75,9 +97,9 @@ func _create_grid() -> void:
 	anchor_right = 0.5
 	anchor_top = 0.5
 	anchor_bottom = 0.5
-	offset_left = -(grid_width + padding * 2) / 2
+	offset_left = - (grid_width + padding * 2) / 2
 	offset_right = (grid_width + padding * 2) / 2
-	offset_top = -(grid_height + padding * 2) / 2
+	offset_top = - (grid_height + padding * 2) / 2
 	offset_bottom = (grid_height + padding * 2) / 2
 
 
@@ -122,11 +144,14 @@ func _update_slot(index: int) -> void:
 
 	var slot_data = inventory.get_slot(index)
 	var label = _slot_labels[index]
+	var name_label = _name_labels[index]
 
 	if slot_data.item == 0 or slot_data.count <= 0:
 		label.text = ""
+		name_label.text = ""
 	else:
 		label.text = str(slot_data.count)
+		name_label.text = ItemData.get_item_name(slot_data.item)
 
 
 func get_slot_count() -> int:

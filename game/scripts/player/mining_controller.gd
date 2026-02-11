@@ -6,7 +6,7 @@ extends Node
 
 signal block_mined(position: Vector2i, block_type: int)
 
-const MINING_RANGE: float = 80.0  # 5 tiles * 16 pixels
+const MINING_RANGE: float = 80.0 # 5 tiles * 16 pixels
 const TILE_SIZE: int = 16
 
 var tile_world: TileWorld
@@ -42,7 +42,6 @@ func set_player_position(pos: Vector2) -> void:
 func try_mine_at(world_position: Vector2) -> bool:
 	## Attempt to mine block at world position
 	## Returns true if mining succeeded
-
 	if tile_world == null or inventory == null:
 		return false
 
@@ -86,7 +85,7 @@ func world_to_tile(world_pos: Vector2) -> Vector2i:
 	## Negate Y because screen Y is down but tile world Y is up (altitude)
 	return Vector2i(
 		int(floor(world_pos.x / TILE_SIZE)),
-		int(floor(-world_pos.y / TILE_SIZE))
+		- int(floor(world_pos.y / TILE_SIZE))
 	)
 
 

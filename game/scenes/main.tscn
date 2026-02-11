@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://bvxk2r4m6c5qa"]
+[gd_scene format=3 uid="uid://bvxk2r4m6c5qa"]
 
 [ext_resource type="Script" uid="uid://bnv7id5xx1656" path="res://game/scripts/main.gd" id="1_main"]
 [ext_resource type="Script" uid="uid://b7wuulkoyytj2" path="res://game/scripts/rendering/world_renderer.gd" id="2_renderer"]
@@ -9,32 +9,48 @@
 [ext_resource type="Script" uid="uid://culfwwda34j6v" path="res://game/scripts/ui/hotbar_ui.gd" id="7_hotbar_ui"]
 [ext_resource type="Script" uid="uid://dnq2c360rifwy" path="res://game/scripts/ui/inventory_ui.gd" id="8_inventory_ui"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=1968948221]
 script = ExtResource("1_main")
 
-[node name="WorldRenderer" type="Node2D" parent="."]
+[node name="WorldRenderer" type="Node2D" parent="." unique_id=128519910]
 script = ExtResource("2_renderer")
 
-[node name="Player" parent="." instance=ExtResource("3_player")]
-position = Vector2(0, -64)
+[node name="Player" parent="." unique_id=1760623144 instance=ExtResource("3_player")]
+position = Vector2(576, 325)
 
-[node name="InputManager" type="Node" parent="."]
+[node name="InputManager" type="Node" parent="." unique_id=759401086]
 script = ExtResource("4_input_manager")
 
-[node name="MiningController" type="Node" parent="."]
+[node name="MiningController" type="Node" parent="." unique_id=2028308272]
 script = ExtResource("5_mining_controller")
 
-[node name="PlacementController" type="Node" parent="."]
+[node name="PlacementController" type="Node" parent="." unique_id=2010182264]
 script = ExtResource("6_placement_controller")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1528384235]
 
-[node name="HotbarUI" type="Control" parent="CanvasLayer"]
+[node name="HotbarUI" type="Control" parent="CanvasLayer" unique_id=1327012021]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -232.0
+offset_top = -68.0
+offset_right = 232.0
+offset_bottom = -20.0
 script = ExtResource("7_hotbar_ui")
 
-[node name="InventoryUI" type="Control" parent="CanvasLayer"]
+[node name="InventoryUI" type="Control" parent="CanvasLayer" unique_id=2082647549]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -252.0
+offset_top = -122.0
+offset_right = 252.0
+offset_bottom = 122.0
 script = ExtResource("8_inventory_ui")

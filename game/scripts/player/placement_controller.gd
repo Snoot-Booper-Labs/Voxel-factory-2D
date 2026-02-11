@@ -6,13 +6,13 @@ extends Node
 
 signal block_placed(position: Vector2i, block_type: int)
 
-const PLACEMENT_RANGE: float = 80.0  # 5 tiles * 16 pixels
+const PLACEMENT_RANGE: float = 80.0 # 5 tiles * 16 pixels
 const TILE_SIZE: int = 16
 
 var tile_world: TileWorld
 var inventory: Inventory
 var player_position: Vector2 = Vector2.ZERO
-var selected_slot: int = 0  # Current hotbar slot
+var selected_slot: int = 0 # Current hotbar slot
 
 
 func setup(world: TileWorld, inv: Inventory) -> void:
@@ -25,13 +25,12 @@ func set_player_position(pos: Vector2) -> void:
 
 
 func set_selected_slot(slot: int) -> void:
-	selected_slot = clamp(slot, 0, 8)  # Hotbar slots 0-8
+	selected_slot = clamp(slot, 0, 8) # Hotbar slots 0-8
 
 
 func try_place_at(world_position: Vector2) -> bool:
 	## Attempt to place block at world position from selected slot
 	## Returns true if placement succeeded
-
 	if tile_world == null or inventory == null:
 		return false
 
@@ -77,7 +76,7 @@ func world_to_tile(world_pos: Vector2) -> Vector2i:
 	## Negate Y because screen Y is down but tile world Y is up (altitude)
 	return Vector2i(
 		int(floor(world_pos.x / TILE_SIZE)),
-		int(floor(-world_pos.y / TILE_SIZE))
+		- int(floor(world_pos.y / TILE_SIZE))
 	)
 
 

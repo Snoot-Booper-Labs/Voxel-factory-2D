@@ -1,5 +1,14 @@
 # Workflow
 
+## Conductor Plugin
+The **Conductor Plugin** (located at `~\.gemini\extensions\conductor`) MUST always be used for all project management, planning, and implementation tasks. 
+
+- Use `/conductor:newTrack` for any new feature or bug fix.
+- Use `/conductor:implement` to execute approved track plans.
+- Refer to `conductor/tracks.md` for the current project status.
+- Follow the **Context -> Spec & Plan -> Implement** lifecycle for every task.
+
+
 ## Development Loop (The Ralph Loop)
 
 1.  **Plan**: Define the task in a Track Plan.
