@@ -195,7 +195,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"jump",
-"speed": 5.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -224,7 +224,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"run",
-"speed": 5.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -253,24 +253,22 @@ animations = [{
 }],
 "loop": true,
 "name": &"walk",
-"speed": 5.0
+"speed": 7.0
 }]
 
 [node name="Player" type="CharacterBody2D" unique_id=1813292425]
 script = ExtResource("1_script")
-texture = ExtResource("2_texture")
-hframes = 24
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=277996202]
 position = Vector2(0, -3.5)
 shape = SubResource("RectangleShape2D_collision")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1855869305]
+[node name="PlayerSpriteAnimation2D" type="AnimatedSprite2D" parent="." unique_id=1855869305]
 position = Vector2(0.9999962, -11.999996)
 scale = Vector2(0.3671875, 0.3671875)
 sprite_frames = SubResource("SpriteFrames_o5wgc")
-animation = &"idle"
-frame_progress = 0.368799
+animation = &"walk"
+frame_progress = 0.096904166
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=940515657]
 visible = false
