@@ -56,39 +56,47 @@ func _on_block_changed(pos: Vector2i, _old_type: int, new_type: int) -> void:
 		tile_map_layer.set_cell(screen_pos, TILE_SOURCE_ID, Vector2i(new_type, 0))
 
 
-const RENDER_DISTANCE: int = 5 # Radius in chunks
-
-var tracking_target: Node2D
+const RENDER_DISTANCE: int = 5 # Radius in chunks (Deprecated / used for fallback)
 var _loaded_chunks: Dictionary = {} # Vector2i -> bool
-var _last_chunk_pos: Vector2i = Vector2i(999999, 999999) # Initialize far away
+var _last_bounds: Rect2i = Rect2i()
 
 signal chunk_loaded(chunk_pos: Vector2i)
 signal chunk_unloaded(chunk_pos: Vector2i)
 
 
 func _process(_delta: float) -> void:
-	if tracking_target == null or tile_world == null:
+	if tile_world == null:
 		return
 
-	var current_chunk = WorldUtils.world_to_chunk(tracking_target.global_position)
+	# Calculate visible world area using the canvas transform
+	# This automatically handles camera position, zoom, and window resizing
+	var canvas_transform = get_canvas_transform()
+	var visible_rect = get_viewport_rect()
+	
+	# Transform viewport corners to world space
+	var top_left = canvas_transform.affine_inverse() * visible_rect.position
+	var bottom_right = canvas_transform.affine_inverse() * visible_rect.end
+	
+	var world_rect = Rect2(top_left, bottom_right - top_left)
+	var current_bounds = WorldUtils.get_chunk_bounds_from_world_rect(world_rect)
 
-	if current_chunk != _last_chunk_pos:
-		_update_chunks(current_chunk)
-		_last_chunk_pos = current_chunk
+	if current_bounds != _last_bounds:
+		_update_chunks(current_bounds)
+		_last_bounds = current_bounds
 
 
-func set_tracking_target(target: Node2D) -> void:
-	tracking_target = target
-	# Force update
-	_last_chunk_pos = Vector2i(999999, 999999)
+func set_tracking_target(_target: Node2D) -> void:
+	# Deprecated: View bounds are now calculated from the viewport transform
+	pass
 
 
-func _update_chunks(center_chunk: Vector2i) -> void:
+func _update_chunks(bounds: Rect2i) -> void:
 	var needed_chunks = {}
 
 	# Determine which chunks should be visible
-	for y in range(center_chunk.y - RENDER_DISTANCE, center_chunk.y + RENDER_DISTANCE + 1):
-		for x in range(center_chunk.x - RENDER_DISTANCE, center_chunk.x + RENDER_DISTANCE + 1):
+	var end = bounds.position + bounds.size
+	for y in range(bounds.position.y, end.y):
+		for x in range(bounds.position.x, end.x):
 			needed_chunks[Vector2i(x, y)] = true
 
 	# Unload chunks that are no longer needed
@@ -150,4 +158,4 @@ func clear() -> void:
 	## Clear all rendered tiles
 	tile_map_layer.clear()
 	_loaded_chunks.clear()
-	_last_chunk_pos = Vector2i(999999, 999999)
+	_last_bounds = Rect2i()

@@ -92,15 +92,15 @@ func _create_grid() -> void:
 	background.custom_minimum_size = Vector2(grid_width + padding * 2, grid_height + padding * 2)
 	grid.position = Vector2(padding, padding)
 
-	# Center on screen
-	anchor_left = 0.5
-	anchor_right = 0.5
-	anchor_top = 0.5
-	anchor_bottom = 0.5
-	offset_left = - (grid_width + padding * 2) / 2
-	offset_right = (grid_width + padding * 2) / 2
-	offset_top = - (grid_height + padding * 2) / 2
-	offset_bottom = (grid_height + padding * 2) / 2
+	# Center on screen - depreciated for lower position
+	#anchor_left = 0.5
+	#anchor_right = 0.5
+	#anchor_top = 0.5
+	#anchor_bottom = 0.5
+	#offset_left = - (grid_width + padding * 2) / 2
+	#offset_right = (grid_width + padding * 2) / 2
+	#offset_top = - (grid_height + padding * 2) / 2
+	#offset_bottom = (grid_height + padding * 2) / 2
 
 
 func toggle() -> void:

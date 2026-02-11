@@ -19,6 +19,10 @@ run/main_scene="res://game/scenes/main.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[display]
+
+window/size/mode=2
+
 [input]
 
 move_left={
@@ -110,3 +114,4 @@ hotbar_9={
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+environment/defaults/default_clear_color=Color(0.13422304, 0.4872213, 0.85714775, 1)

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bnv7id5xx1656" path="res://game/scripts/main.gd" id="1_main"]
 [ext_resource type="Script" uid="uid://b7wuulkoyytj2" path="res://game/scripts/rendering/world_renderer.gd" id="2_renderer"]
-[ext_resource type="PackedScene" path="res://game/scenes/player.tscn" id="3_player"]
+[ext_resource type="PackedScene" uid="uid://cqcyk7qp27o0y" path="res://game/scenes/player.tscn" id="3_player"]
 [ext_resource type="Script" uid="uid://c2tlc18nky06c" path="res://game/scripts/player/input_manager.gd" id="4_input_manager"]
 [ext_resource type="Script" uid="uid://ccikwm45c0wv8" path="res://game/scripts/player/mining_controller.gd" id="5_mining_controller"]
 [ext_resource type="Script" uid="uid://bkgc1f2uawsps" path="res://game/scripts/player/placement_controller.gd" id="6_placement_controller"]
@@ -40,17 +40,21 @@ offset_left = -232.0
 offset_top = -68.0
 offset_right = 232.0
 offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
 script = ExtResource("7_hotbar_ui")
 
 [node name="InventoryUI" type="Control" parent="CanvasLayer" unique_id=2082647549]
 layout_mode = 3
-anchors_preset = 8
+anchors_preset = 7
 anchor_left = 0.5
-anchor_top = 0.5
+anchor_top = 1.0
 anchor_right = 0.5
-anchor_bottom = 0.5
+anchor_bottom = 1.0
 offset_left = -252.0
-offset_top = -122.0
-offset_right = 252.0
-offset_bottom = 122.0
+offset_top = -323.0
+offset_right = 252.00006
+offset_bottom = -79.0
+grow_horizontal = 2
+grow_vertical = 0
 script = ExtResource("8_inventory_ui")
