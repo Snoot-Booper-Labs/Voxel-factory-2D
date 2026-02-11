@@ -58,7 +58,7 @@ func _handle_actions() -> void:
 		return
 
 	# simple click-to-interact
-	if Input.is_action_just_pressed("mine"):
+	if Input.is_action_pressed("mine"):
 		if mining_controller:
 			mining_controller.try_mine_at(player_controller.get_global_mouse_position())
 
