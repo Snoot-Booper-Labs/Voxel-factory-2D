@@ -35,7 +35,9 @@ Always use the headless command.
 **CRITICAL**: When specifying a test file or directory, you **MUST** use the `res://` prefix.
 
 **Correct:**
-`..\engine\Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/unit/test_foo.gd`
+Windows: `..\engine\Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/unit/test_foo.gd`
+
+MacOS: `/Applications/Godot.app/Contents/MacOS/Godot --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/unit/test_foo.gd`
 
 **Incorrect:**
 `..\engine\Godot_v4.6-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=tests/unit/test_foo.gd`

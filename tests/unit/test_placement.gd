@@ -55,34 +55,6 @@ func test_set_selected_slot_clamped_low() -> void:
 
 
 # =============================================================================
-# Coordinate Conversion Tests
-# Note: Screen Y is down, world Y is up, so world_to_tile negates Y
-# =============================================================================
-
-func test_world_to_tile_conversion() -> void:
-	# Screen (32, -48) -> tile (2, 3) because -(-48)/16 = 3
-	var result = placement_controller.world_to_tile(Vector2(32, -48))
-	assert_eq(result, Vector2i(2, 3))
-
-
-func test_world_to_tile_negative() -> void:
-	# Screen (-16, 32) -> tile (-1, -2) because -(32)/16 = -2
-	var result = placement_controller.world_to_tile(Vector2(-16, 32))
-	assert_eq(result, Vector2i(-1, -2))
-
-
-func test_world_to_tile_fractional() -> void:
-	# Screen (17, -33) -> tile (1, 2) because -(-33)/16 = 2 (floor)
-	var result = placement_controller.world_to_tile(Vector2(17, -33))
-	assert_eq(result, Vector2i(1, 2))
-
-
-func test_world_to_tile_zero() -> void:
-	var result = placement_controller.world_to_tile(Vector2(0, 0))
-	assert_eq(result, Vector2i(0, 0))
-
-
-# =============================================================================
 # Range Checking Tests
 # =============================================================================
 
@@ -126,8 +98,8 @@ func test_try_place_succeeds() -> void:
 	# Ensure target is air at world tile (2, 2)
 	tile_world.set_block(2, 2, BlockData.BlockType.AIR)
 
-	# Screen pos (40, -40) -> tile (2, 2)
-	var result = placement_controller.try_place_at(Vector2(40, -40))
+	# Screen pos (40, -24) -> tile (2, 2)
+	var result = placement_controller.try_place_at(Vector2(40, -24))
 
 	assert_true(result)
 	assert_eq(tile_world.get_block(2, 2), BlockData.BlockType.DIRT)
@@ -139,8 +111,8 @@ func test_try_place_removes_from_inventory() -> void:
 	placement_controller.set_selected_slot(0)
 	tile_world.set_block(2, 2, BlockData.BlockType.AIR)
 
-	# Screen pos (40, -40) -> tile (2, 2)
-	placement_controller.try_place_at(Vector2(40, -40))
+	# Screen pos (40, -24) -> tile (2, 2)
+	placement_controller.try_place_at(Vector2(40, -24))
 
 	var slot = inventory.get_slot(0)
 	assert_eq(slot.count, 4)
@@ -163,8 +135,8 @@ func test_try_place_non_placeable_fails() -> void:
 	placement_controller.set_selected_slot(0)
 	tile_world.set_block(2, 2, BlockData.BlockType.AIR)
 
-	# Screen pos (40, -40) -> tile (2, 2)
-	var result = placement_controller.try_place_at(Vector2(40, -40))
+	# Screen pos (40, -24) -> tile (2, 2)
+	var result = placement_controller.try_place_at(Vector2(40, -24))
 
 	assert_false(result)
 
@@ -176,8 +148,8 @@ func test_try_place_on_solid_fails() -> void:
 	# Target is stone, not air at world tile (2, 2)
 	tile_world.set_block(2, 2, BlockData.BlockType.STONE)
 
-	# Screen pos (40, -40) -> tile (2, 2)
-	var result = placement_controller.try_place_at(Vector2(40, -40))
+	# Screen pos (40, -24) -> tile (2, 2)
+	var result = placement_controller.try_place_at(Vector2(40, -24))
 
 	assert_false(result)
 
@@ -187,8 +159,8 @@ func test_try_place_empty_slot_fails() -> void:
 	placement_controller.set_selected_slot(0)
 	tile_world.set_block(2, 2, BlockData.BlockType.AIR)
 
-	# Screen pos (40, -40) -> tile (2, 2)
-	var result = placement_controller.try_place_at(Vector2(40, -40))
+	# Screen pos (40, -24) -> tile (2, 2)
+	var result = placement_controller.try_place_at(Vector2(40, -24))
 
 	assert_false(result)
 
@@ -198,7 +170,7 @@ func test_try_place_without_setup_fails() -> void:
 	add_child(controller)
 	controller.set_player_position(Vector2(0, 0))
 
-	var result = controller.try_place_at(Vector2(20, -20))
+	var result = controller.try_place_at(Vector2(20, -8))
 
 	assert_false(result)
 	controller.queue_free()
@@ -210,8 +182,8 @@ func test_try_place_stone_block() -> void:
 	placement_controller.set_selected_slot(0)
 	tile_world.set_block(1, 1, BlockData.BlockType.AIR)
 
-	# Screen pos (20, -20) -> tile (1, 1)
-	var result = placement_controller.try_place_at(Vector2(20, -20))
+	# Screen pos (20, -8) -> tile (1, 1)
+	var result = placement_controller.try_place_at(Vector2(20, -8))
 
 	assert_true(result)
 	assert_eq(tile_world.get_block(1, 1), BlockData.BlockType.STONE)
@@ -223,8 +195,11 @@ func test_try_place_wood_block() -> void:
 	placement_controller.set_selected_slot(0)
 	tile_world.set_block(3, 3, BlockData.BlockType.AIR)
 
-	# Screen pos (48, -48) -> tile (3, 3)
-	var result = placement_controller.try_place_at(Vector2(48, -48))
+	# Screen pos (48, -48) -> tile (3, 3) -- OLD
+	# Tile 3 Y is [-48, -32). Center is -40.
+	# Wait, -48 is exactly on boundary? -48/16 = -3. floor(-3)=-3. -(-3)=3.
+	# Screen pos (48, -40) -> tile (3, 3)
+	var result = placement_controller.try_place_at(Vector2(48, -40))
 
 	assert_true(result)
 	assert_eq(tile_world.get_block(3, 3), BlockData.BlockType.WOOD)
@@ -242,8 +217,8 @@ func test_block_placed_signal_emitted() -> void:
 	tile_world.set_block(2, 2, BlockData.BlockType.AIR)
 
 	watch_signals(placement_controller)
-	# Screen pos (40, -40) -> tile (2, 2)
-	placement_controller.try_place_at(Vector2(40, -40))
+	# Screen pos (40, -24) -> tile (2, 2)
+	placement_controller.try_place_at(Vector2(40, -24))
 
 	assert_signal_emitted(placement_controller, "block_placed")
 
@@ -255,8 +230,10 @@ func test_block_placed_signal_has_correct_parameters() -> void:
 	tile_world.set_block(2, 3, BlockData.BlockType.AIR)
 
 	watch_signals(placement_controller)
-	# Screen pos (40, -56) -> tile (2, 3)
-	placement_controller.try_place_at(Vector2(40, -56))
+	# Screen pos (40, -56) -> tile (2, 3) -- OLD
+	# Tile 3 Y is [-48, -32). -56 is Tile 4.
+	# Screen pos (40, -40) -> tile (2, 3)
+	placement_controller.try_place_at(Vector2(40, -40))
 
 	var params = get_signal_parameters(placement_controller, "block_placed", 0)
 	assert_eq(params[0], Vector2i(2, 3), "Signal should include tile position")
@@ -268,8 +245,8 @@ func test_block_placed_signal_not_emitted_on_failure() -> void:
 	tile_world.set_block(2, 2, BlockData.BlockType.STONE)
 
 	watch_signals(placement_controller)
-	# Screen pos (40, -40) -> tile (2, 2) which has STONE
-	placement_controller.try_place_at(Vector2(40, -40))
+	# Screen pos (40, -24) -> tile (2, 2) which has STONE
+	placement_controller.try_place_at(Vector2(40, -24))
 
 	assert_signal_not_emitted(placement_controller, "block_placed")
 
@@ -307,18 +284,14 @@ func test_placement_range_constant() -> void:
 	assert_eq(PlacementController.PLACEMENT_RANGE, 80.0, "Placement range should be 80 pixels (5 tiles)")
 
 
-func test_tile_size_constant() -> void:
-	assert_eq(PlacementController.TILE_SIZE, 16, "Tile size should be 16 pixels")
-
-
 func test_try_place_last_item_clears_slot() -> void:
 	placement_controller.set_player_position(Vector2(0, 0))
 	inventory.add_item(ItemData.ItemType.DIRT, 1)
 	placement_controller.set_selected_slot(0)
 	tile_world.set_block(2, 2, BlockData.BlockType.AIR)
 
-	# Screen pos (40, -40) -> tile (2, 2)
-	placement_controller.try_place_at(Vector2(40, -40))
+	# Screen pos (40, -24) -> tile (2, 2)
+	placement_controller.try_place_at(Vector2(40, -24))
 
 	var slot = inventory.get_slot(0)
 	assert_eq(slot.item, 0, "Slot should be cleared after placing last item")

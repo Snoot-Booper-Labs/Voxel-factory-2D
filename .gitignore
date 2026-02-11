@@ -1,4 +1,24 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
-.vscode/settings.json
+*.import/
+export_presets.cfg
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.uv/
+.python-version
+build/
+dist/
+*.egg-info/
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# IDE
+.vscode/

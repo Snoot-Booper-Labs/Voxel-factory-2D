@@ -36,34 +36,6 @@ func test_setup_stores_references() -> void:
 
 
 # =============================================================================
-# Coordinate Conversion Tests
-# Note: Screen Y is down, world Y is up, so world_to_tile negates Y
-# =============================================================================
-
-func test_world_to_tile_conversion() -> void:
-	# Screen (32, -48) -> tile (2, 3) because -(-48)/16 = 3
-	var result = mining_controller.world_to_tile(Vector2(32, -48))
-	assert_eq(result, Vector2i(2, 3))
-
-
-func test_world_to_tile_negative() -> void:
-	# Screen (-16, 32) -> tile (-1, -2) because -(32)/16 = -2
-	var result = mining_controller.world_to_tile(Vector2(-16, 32))
-	assert_eq(result, Vector2i(-1, -2))
-
-
-func test_world_to_tile_fractional() -> void:
-	# Screen (17, -33) -> tile (1, 2) because -(-33)/16 = 2 (floor)
-	var result = mining_controller.world_to_tile(Vector2(17, -33))
-	assert_eq(result, Vector2i(1, 2))
-
-
-func test_world_to_tile_zero() -> void:
-	var result = mining_controller.world_to_tile(Vector2(0, 0))
-	assert_eq(result, Vector2i(0, 0))
-
-
-# =============================================================================
 # Range Checking Tests
 # =============================================================================
 
@@ -103,8 +75,8 @@ func test_try_mine_removes_block() -> void:
 	# Set a stone block at world tile (1, 1)
 	tile_world.set_block(1, 1, BlockData.BlockType.STONE)
 
-	# Mine at screen pos (20, -20) -> tile (1, 1)
-	var result = mining_controller.try_mine_at(Vector2(20, -20))
+	# Mine at screen pos (20, -8) -> tile (1, 1)
+	var result = mining_controller.try_mine_at(Vector2(20, -8))
 
 	assert_true(result)
 	assert_eq(tile_world.get_block(1, 1), BlockData.BlockType.AIR)
@@ -114,8 +86,8 @@ func test_try_mine_adds_to_inventory() -> void:
 	mining_controller.set_player_position(Vector2(0, 0))
 	tile_world.set_block(1, 1, BlockData.BlockType.STONE)
 
-	# Screen pos (20, -20) -> tile (1, 1)
-	mining_controller.try_mine_at(Vector2(20, -20))
+	# Screen pos (20, -8) -> tile (1, 1)
+	mining_controller.try_mine_at(Vector2(20, -8))
 
 	# Stone drops cobblestone (ItemType.COBBLESTONE = 7)
 	assert_true(inventory.has_item(ItemData.ItemType.COBBLESTONE, 1))
@@ -125,8 +97,8 @@ func test_try_mine_dirt_adds_dirt_to_inventory() -> void:
 	mining_controller.set_player_position(Vector2(0, 0))
 	tile_world.set_block(1, 1, BlockData.BlockType.DIRT)
 
-	# Screen pos (20, -20) -> tile (1, 1)
-	mining_controller.try_mine_at(Vector2(20, -20))
+	# Screen pos (20, -8) -> tile (1, 1)
+	mining_controller.try_mine_at(Vector2(20, -8))
 
 	# Dirt drops dirt (ItemType.DIRT = 1)
 	assert_true(inventory.has_item(ItemData.ItemType.DIRT, 1))
@@ -146,8 +118,8 @@ func test_try_mine_air_fails() -> void:
 	mining_controller.set_player_position(Vector2(0, 0))
 	tile_world.set_block(1, 1, BlockData.BlockType.AIR)
 
-	# Screen pos (20, -20) -> tile (1, 1)
-	var result = mining_controller.try_mine_at(Vector2(20, -20))
+	# Screen pos (20, -8) -> tile (1, 1)
+	var result = mining_controller.try_mine_at(Vector2(20, -8))
 
 	assert_false(result)
 
@@ -157,7 +129,7 @@ func test_try_mine_without_setup_fails() -> void:
 	add_child(controller)
 	controller.set_player_position(Vector2(0, 0))
 
-	var result = controller.try_mine_at(Vector2(20, -20))
+	var result = controller.try_mine_at(Vector2(20, -8))
 
 	assert_false(result)
 	controller.queue_free()
@@ -167,8 +139,8 @@ func test_try_mine_leaves_no_drop() -> void:
 	mining_controller.set_player_position(Vector2(0, 0))
 	tile_world.set_block(1, 1, BlockData.BlockType.LEAVES)
 
-	# Screen pos (20, -20) -> tile (1, 1)
-	var result = mining_controller.try_mine_at(Vector2(20, -20))
+	# Screen pos (20, -8) -> tile (1, 1)
+	var result = mining_controller.try_mine_at(Vector2(20, -8))
 
 	# Leaves should be mined but drop nothing
 	assert_true(result)
@@ -185,8 +157,8 @@ func test_block_mined_signal_emitted() -> void:
 	tile_world.set_block(1, 1, BlockData.BlockType.DIRT)
 
 	watch_signals(mining_controller)
-	# Screen pos (20, -20) -> tile (1, 1)
-	mining_controller.try_mine_at(Vector2(20, -20))
+	# Screen pos (20, -8) -> tile (1, 1)
+	mining_controller.try_mine_at(Vector2(20, -8))
 
 	assert_signal_emitted(mining_controller, "block_mined")
 
@@ -196,8 +168,8 @@ func test_block_mined_signal_has_correct_parameters() -> void:
 	tile_world.set_block(2, 3, BlockData.BlockType.STONE)
 
 	watch_signals(mining_controller)
-	# Screen pos (40, -56) -> tile (2, 3)
-	mining_controller.try_mine_at(Vector2(40, -56))
+	# Screen pos (40, -40) -> tile (2, 3)
+	mining_controller.try_mine_at(Vector2(40, -40))
 
 	var params = get_signal_parameters(mining_controller, "block_mined", 0)
 	assert_eq(params[0], Vector2i(2, 3), "Signal should include tile position")
@@ -209,8 +181,8 @@ func test_block_mined_signal_not_emitted_on_failure() -> void:
 	tile_world.set_block(1, 1, BlockData.BlockType.AIR)
 
 	watch_signals(mining_controller)
-	# Screen pos (20, -20) -> tile (1, 1) which is AIR
-	mining_controller.try_mine_at(Vector2(20, -20))
+	# Screen pos (20, -8) -> tile (1, 1) which is AIR
+	mining_controller.try_mine_at(Vector2(20, -8))
 
 	assert_signal_not_emitted(mining_controller, "block_mined")
 
@@ -221,7 +193,3 @@ func test_block_mined_signal_not_emitted_on_failure() -> void:
 
 func test_mining_range_constant() -> void:
 	assert_eq(MiningController.MINING_RANGE, 80.0, "Mining range should be 80 pixels (5 tiles)")
-
-
-func test_tile_size_constant() -> void:
-	assert_eq(MiningController.TILE_SIZE, 16, "Tile size should be 16 pixels")

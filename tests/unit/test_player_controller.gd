@@ -5,6 +5,15 @@ var player: PlayerController
 
 func before_each() -> void:
 	player = PlayerController.new()
+	var sprite = AnimatedSprite2D.new()
+	sprite.name = "PlayerSpriteAnimation2D"
+	var frames = SpriteFrames.new()
+	frames.add_animation("jump")
+	frames.add_animation("run")
+	frames.add_animation("walk")
+	frames.add_animation("idle")
+	sprite.sprite_frames = frames
+	player.add_child(sprite)
 	add_child(player)
 
 

@@ -31,7 +31,43 @@ func setup(world: TileWorld, start_pos: Vector2, start_dir: Vector2i) -> void:
 	_state = State.MOVING
 
 
+# Bridge methods for Testing and Program execution
+func set_mining_program(start: CommandBlock) -> void:
+	var program = get_component("Program")
+	if program:
+		program.set_program(start)
+
+func get_program() -> Program:
+	return get_component("Program") as Program
+
+func start_mining(world: TileWorld) -> void:
+	tile_world = world
+	var program = get_component("Program")
+	# Pass self as context so commands can control the miner
+	if program:
+		program.start({"entity": self, "miner": self, "world": world, "inventory": get_inventory()})
+
+func tick() -> bool:
+	var program = get_component("Program")
+	if program:
+		return program.tick()
+	return false
+
+# Exposed for commands to use (if needed) or internal logic
+func move_forward() -> void:
+	# Implement if needed by MoveBlock
+	pass
+
+func mine_forward() -> void:
+	# Implement if needed by MineBlock
+	pass
+
+
 func _process(delta: float) -> void:
+	# Only run simple logic if NOT running a program?
+	# Or if program is not running?
+	# For now, let's assume if _process is running, it does simple logic.
+	# Unit tests likely don't add to scene or don't rely on _process/physics.
 	if tile_world == null:
 		return
 
