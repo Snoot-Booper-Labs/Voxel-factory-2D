@@ -13,6 +13,9 @@ enum ItemType {
 	GRASS = 6,
 	COBBLESTONE = 7,
 	PLANKS = 8,
+	BEDROCK = 9,
+	# Entities (10-19)
+	MINER = 10,
 	# Material items (20-39)
 	COAL = 20,
 	IRON_ORE = 21,
@@ -36,14 +39,16 @@ enum ItemType {
 static var item_properties: Dictionary = {
 	ItemType.NONE: {"max_stack": 0, "name": "None", "placeable": false},
 	# Block items
-	ItemType.DIRT: {"max_stack": 64, "name": "Dirt", "placeable": true, "block": 2},  # BlockData.BlockType.DIRT
-	ItemType.STONE: {"max_stack": 64, "name": "Stone", "placeable": true, "block": 3},  # BlockData.BlockType.STONE
-	ItemType.WOOD: {"max_stack": 64, "name": "Wood", "placeable": true, "block": 4},  # BlockData.BlockType.WOOD
-	ItemType.LEAVES: {"max_stack": 64, "name": "Leaves", "placeable": true, "block": 5},  # BlockData.BlockType.LEAVES
-	ItemType.SAND: {"max_stack": 64, "name": "Sand", "placeable": true, "block": 6},  # BlockData.BlockType.SAND
-	ItemType.GRASS: {"max_stack": 64, "name": "Grass", "placeable": true, "block": 1},  # BlockData.BlockType.GRASS
-	ItemType.COBBLESTONE: {"max_stack": 64, "name": "Cobblestone", "placeable": true, "block": 12},  # BlockData.BlockType.COBBLESTONE
-	ItemType.PLANKS: {"max_stack": 64, "name": "Planks", "placeable": true, "block": 13},  # BlockData.BlockType.PLANKS
+	ItemType.DIRT: {"max_stack": 64, "name": "Dirt", "placeable": true, "block": 2}, # BlockData.BlockType.DIRT
+	ItemType.STONE: {"max_stack": 64, "name": "Stone", "placeable": true, "block": 3}, # BlockData.BlockType.STONE
+	ItemType.WOOD: {"max_stack": 64, "name": "Wood", "placeable": true, "block": 4}, # BlockData.BlockType.WOOD
+	ItemType.LEAVES: {"max_stack": 64, "name": "Leaves", "placeable": true, "block": 5}, # BlockData.BlockType.LEAVES
+	ItemType.SAND: {"max_stack": 64, "name": "Sand", "placeable": true, "block": 6}, # BlockData.BlockType.SAND
+	ItemType.GRASS: {"max_stack": 64, "name": "Grass", "placeable": true, "block": 1}, # BlockData.BlockType.GRASS
+	ItemType.COBBLESTONE: {"max_stack": 64, "name": "Cobblestone", "placeable": true, "block": 12}, # BlockData.BlockType.COBBLESTONE
+	ItemType.PLANKS: {"max_stack": 64, "name": "Planks", "placeable": true, "block": 13}, # BlockData.BlockType.PLANKS
+	# Entity items
+	ItemType.MINER: {"max_stack": 1, "name": "Miner", "placeable": true, "is_entity": true},
 	# Material items
 	ItemType.COAL: {"max_stack": 64, "name": "Coal", "placeable": false},
 	ItemType.IRON_ORE: {"max_stack": 64, "name": "Iron Ore", "placeable": false},
@@ -85,4 +90,20 @@ static func is_placeable(item_type: int) -> bool:
 static func get_block_for_item(item_type: int) -> int:
 	if item_properties.has(item_type) and item_properties[item_type].has("block"):
 		return item_properties[item_type]["block"]
-	return 0  # AIR if not placeable
+	return 0
+
+
+static func is_entity(item_type: int) -> bool:
+	if item_properties.has(item_type) and item_properties[item_type].has("is_entity"):
+		return item_properties[item_type]["is_entity"]
+	return false
+
+
+static func get_type_from_name(name_str: String) -> int:
+	name_str = name_str.to_lower()
+	for type in item_properties:
+		var item_name = item_properties[type]["name"].to_lower()
+		if item_name == name_str:
+			return type
+		# Handle some common mismatches if needed (e.g. "wood" vs "log")
+	return ItemType.NONE
