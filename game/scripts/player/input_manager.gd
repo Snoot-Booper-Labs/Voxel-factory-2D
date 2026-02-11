@@ -39,6 +39,11 @@ func _handle_movement() -> void:
 	if Input.is_action_pressed("move_right"):
 		direction += 1.0
 	player_controller.set_move_direction(direction)
+	
+	if Input.is_key_pressed(KEY_SHIFT):
+		player_controller.set_wants_walk(true)
+	else:
+		player_controller.set_wants_walk(false)
 
 
 func _handle_jump() -> void:

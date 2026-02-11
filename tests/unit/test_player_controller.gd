@@ -63,6 +63,12 @@ func test_stop_resets_wants_jump() -> void:
 	assert_false(player.wants_jump)
 
 
+func test_stop_resets_wants_walk() -> void:
+	player.set_wants_walk(true)
+	player.stop()
+	assert_false(player.wants_walk)
+
+
 func test_gravity_increases_downward_velocity() -> void:
 	var initial_y = player.velocity.y
 	player._physics_process(0.1)
@@ -72,13 +78,20 @@ func test_gravity_increases_downward_velocity() -> void:
 func test_horizontal_movement_sets_velocity() -> void:
 	player.set_move_direction(1.0)
 	player._physics_process(0.016)
-	assert_eq(player.velocity.x, PlayerController.SPEED)
+	assert_eq(player.velocity.x, player.movement_data.speed)
 
 
 func test_horizontal_movement_left() -> void:
 	player.set_move_direction(-1.0)
 	player._physics_process(0.016)
-	assert_eq(player.velocity.x, -PlayerController.SPEED)
+	assert_eq(player.velocity.x, -player.movement_data.speed)
+
+
+func test_walk_sets_slower_velocity() -> void:
+	player.set_move_direction(1.0)
+	player.set_wants_walk(true)
+	player._physics_process(0.016)
+	assert_eq(player.velocity.x, player.movement_data.walk_speed)
 
 
 func test_physics_process_clears_wants_jump() -> void:
