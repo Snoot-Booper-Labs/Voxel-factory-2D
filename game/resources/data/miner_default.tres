@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="MinerData" load_steps=2 format=3 uid="uid://miner_data_default_001"]
+
+[ext_resource type="Script" path="res://game/scripts/data/miner_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+move_speed = 4.0
+mining_power = 1.0
+max_inventory = 10
+color = Color(0.2, 0.2, 0.2, 1)

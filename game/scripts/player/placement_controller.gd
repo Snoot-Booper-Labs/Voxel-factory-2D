@@ -29,7 +29,6 @@ func set_selected_slot(slot: int) -> void:
 
 
 func try_place_at(world_position: Vector2) -> bool:
-	## Attempt to place block at world position from selected slot
 	## Returns true if placement succeeded
 	if tile_world == null or inventory == null:
 		return false
@@ -50,6 +49,11 @@ func try_place_at(world_position: Vector2) -> bool:
 	# Convert to tile coordinates
 	var tile_pos = world_to_tile(world_position)
 
+	# Check if mining/entity placement logic applies
+	if ItemData.is_entity(slot_data.item):
+		return _try_place_entity(slot_data.item, world_position)
+
+	# Block placement logic
 	# Check if target is empty (air)
 	if tile_world.get_block(tile_pos.x, tile_pos.y) != BlockData.BlockType.AIR:
 		return false
@@ -65,6 +69,58 @@ func try_place_at(world_position: Vector2) -> bool:
 
 	block_placed.emit(tile_pos, block_type)
 	return true
+
+
+func _try_place_entity(item_type: int, world_pos: Vector2) -> bool:
+	if item_type == ItemData.ItemType.MINER:
+		var tile_pos = world_to_tile(world_pos)
+
+		# Check if space is clear (2 blocks wide) -> Wait, entities can overlap blocks?
+		# Prompt says "placed down should mine straight left or right".
+		# Assuming it needs space? Or replaces blocks?
+		# "placed down should mine... don't worry about drawing that inventory".
+		# "make it a 2 block wide... with the 'front' being a darker...".
+		# Let's assume it requires empty space to be placed initially.
+		# Check (x,y) and (x+1,y) or just (x,y)?
+		# Let's check the origin tile for now.
+		if tile_world.is_solid(tile_pos.x, tile_pos.y):
+			return false
+
+		# Determine direction based on player relative position
+		# If click is to the right of player, face right. Else left.
+		var direction = Vector2i.RIGHT
+		if world_pos.x < player_position.x:
+			direction = Vector2i.LEFT
+
+		# Instantiate Miner
+		# Note: We need a better way to get the scene path, but hardcoding for this task
+		var miner_scene = load("res://game/scenes/entities/miner.tscn")
+		if miner_scene:
+			var miner = miner_scene.instantiate()
+			# Add to Main scene root (owner of placement controller usually Main)
+			# Find main scene
+			var main = get_node("/root/Main") # Might be unsafe if scene name changes
+			# Better: use get_tree().current_scene if it is Main, or owner if setup correctly
+			# For now, let's try adding to parent of this node (Main)
+			get_parent().add_child(miner)
+
+			# Setup miner
+			# Position: centered on tile? Tiles are 16x16.
+			# Origin is usually top-left of tile in this system?
+			# world_to_tile truncates.
+			# tile * 16 is top-left.
+			# Miner scene visuals are 0,0 to 32,16.
+			# Let's place at tile_pos * 16. Y is inverted.
+			var spawn_pos = Vector2(tile_pos.x * 16.0, -tile_pos.y * 16.0)
+
+			if miner.has_method("setup"):
+				miner.setup(tile_world, spawn_pos, direction)
+
+			# Remove item
+			inventory.remove_item(selected_slot, 1)
+			return true
+
+	return false
 
 
 func is_in_range(world_position: Vector2) -> bool:

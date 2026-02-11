@@ -25,6 +25,8 @@ func _ready() -> void:
 	# Create core systems
 	tile_world = TileWorld.new(WORLD_SEED)
 	inventory = Inventory.new()
+	# Add starting items
+	inventory.add_item(ItemData.ItemType.MINER, 1)
 
 	# Setup world renderer
 	world_renderer.set_tile_world(tile_world)
