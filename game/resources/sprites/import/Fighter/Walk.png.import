@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfv6ut4u2awei"
-path="res://.godot/imported/Walk.png-0614606071045d154e5f757cf0d32204.ctex"
+path="res://.godot/imported/Walk.png-3cfb37b5e288916733fbbe037f4d451a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://game/resources/sprites/import/Fighter/Walk.png"
-dest_files=["res://.godot/imported/Walk.png-0614606071045d154e5f757cf0d32204.ctex"]
+source_file="res://resources/sprites/import/Fighter/Walk.png"
+dest_files=["res://.godot/imported/Walk.png-3cfb37b5e288916733fbbe037f4d451a.ctex"]
 
 [params]
 

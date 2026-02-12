@@ -5,7 +5,7 @@ extends Node2D
 ## Listens to TileWorld.block_changed signal and updates TileMapLayer cells.
 ## Uses the terrain_tileset.tres where BlockType values map to atlas X coordinates.
 
-const TILESET_PATH = "res://game/resources/tiles/terrain_tileset.tres"
+const TILESET_PATH = "res://resources/tiles/terrain_tileset.tres"
 
 var tile_world: TileWorld
 var tile_map_layer: TileMapLayer
@@ -72,11 +72,11 @@ func _process(_delta: float) -> void:
 	# This automatically handles camera position, zoom, and window resizing
 	var canvas_transform = get_canvas_transform()
 	var visible_rect = get_viewport_rect()
-	
+
 	# Transform viewport corners to world space
 	var top_left = canvas_transform.affine_inverse() * visible_rect.position
 	var bottom_right = canvas_transform.affine_inverse() * visible_rect.end
-	
+
 	var world_rect = Rect2(top_left, bottom_right - top_left)
 	var current_bounds = WorldUtils.get_chunk_bounds_from_world_rect(world_rect)
 

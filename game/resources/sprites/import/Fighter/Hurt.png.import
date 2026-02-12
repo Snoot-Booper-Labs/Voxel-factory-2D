@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://uu03phclyoay"
-path="res://.godot/imported/Hurt.png-7df9df2d64aa15f54435dd12967cb5b6.ctex"
+path="res://.godot/imported/Hurt.png-7d44e4dad29e47e30252cba39582b652.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://game/resources/sprites/import/Fighter/Hurt.png"
-dest_files=["res://.godot/imported/Hurt.png-7df9df2d64aa15f54435dd12967cb5b6.ctex"]
+source_file="res://resources/sprites/import/Fighter/Hurt.png"
+dest_files=["res://.godot/imported/Hurt.png-7d44e4dad29e47e30252cba39582b652.ctex"]
 
 [params]
 

@@ -93,7 +93,7 @@ func _try_place_entity(item_type: int, world_pos: Vector2) -> bool:
 
 		# Instantiate Miner
 		# Note: We need a better way to get the scene path, but hardcoding for this task
-		var miner_scene = load("res://game/scenes/entities/miner.tscn")
+		var miner_scene = load("res://scenes/entities/miner.tscn")
 		if miner_scene:
 			var miner = miner_scene.instantiate()
 			# Add to Main scene root (owner of placement controller usually Main)

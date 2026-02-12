@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="MinerData" load_steps=2 format=3 uid="uid://miner_data_default_001"]
 
-[ext_resource type="Script" path="res://game/scripts/data/miner_data.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/data/miner_data.gd" id="1_script"]
 
 [resource]
 script = ExtResource("1_script")

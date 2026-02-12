@@ -12,7 +12,7 @@ extends CharacterBody2D
 
 func _ready() -> void:
 	if not movement_data:
-		movement_data = load("res://game/resources/player/default_movement_data.tres")
+		movement_data = load("res://resources/player/default_movement_data.tres")
 	# Jump velocity should be negative because Godot physics is inverted
 	if movement_data.jump_velocity > 0:
 		movement_data.jump_velocity *= -1

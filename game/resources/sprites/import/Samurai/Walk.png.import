@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b545cl0ogaafp"
-path="res://.godot/imported/Walk.png-4498af895e0ae74b8a2f03786adc2884.ctex"
+path="res://.godot/imported/Walk.png-2fcaf880f69f36e2c05785bf9c14dfa3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://game/resources/sprites/import/Samurai/Walk.png"
-dest_files=["res://.godot/imported/Walk.png-4498af895e0ae74b8a2f03786adc2884.ctex"]
+source_file="res://resources/sprites/import/Samurai/Walk.png"
+dest_files=["res://.godot/imported/Walk.png-2fcaf880f69f36e2c05785bf9c14dfa3.ctex"]
 
 [params]
 

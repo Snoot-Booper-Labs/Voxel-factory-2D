@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://csk6wfwlmwqbo"
-path="res://.godot/imported/Jump.png-52343fd5a88c9457132ba40b4f9040e3.ctex"
+path="res://.godot/imported/Jump.png-bc98368fd08d5d727ccc9f14ebe39483.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://game/resources/sprites/import/Fighter/Jump.png"
-dest_files=["res://.godot/imported/Jump.png-52343fd5a88c9457132ba40b4f9040e3.ctex"]
+source_file="res://resources/sprites/import/Fighter/Jump.png"
+dest_files=["res://.godot/imported/Jump.png-bc98368fd08d5d727ccc9f14ebe39483.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b1jq650ksqw54"
-path="res://.godot/imported/default_parallax_tileset_1080height_02_trees.png-4cd721f30e2aae438e5b35f0c854812c.ctex"
+path="res://.godot/imported/default_parallax_tileset_1080height_02_trees.png-b4f9b9c694bd018db1021d38fd9591ab.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://game/resources/biomes/backgrounds/default/default_parallax_tileset_1080height_02_trees.png"
-dest_files=["res://.godot/imported/default_parallax_tileset_1080height_02_trees.png-4cd721f30e2aae438e5b35f0c854812c.ctex"]
+source_file="res://resources/biomes/backgrounds/default/default_parallax_tileset_1080height_02_trees.png"
+dest_files=["res://.godot/imported/default_parallax_tileset_1080height_02_trees.png-b4f9b9c694bd018db1021d38fd9591ab.ctex"]
 
 [params]
 

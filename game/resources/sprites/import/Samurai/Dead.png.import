@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://m6m0rd4qo8ea"
-path="res://.godot/imported/Dead.png-3d7f928fed6f79b69d6813a733639d5a.ctex"
+path="res://.godot/imported/Dead.png-007120bcaf50cac803412f492288551b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://game/resources/sprites/import/Samurai/Dead.png"
-dest_files=["res://.godot/imported/Dead.png-3d7f928fed6f79b69d6813a733639d5a.ctex"]
+source_file="res://resources/sprites/import/Samurai/Dead.png"
+dest_files=["res://.godot/imported/Dead.png-007120bcaf50cac803412f492288551b.ctex"]
 
 [params]
 

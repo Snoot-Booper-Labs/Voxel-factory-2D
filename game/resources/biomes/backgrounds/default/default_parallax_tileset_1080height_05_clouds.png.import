@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://btnesx3wh73sd"
-path="res://.godot/imported/default_parallax_tileset_1080height_05_clouds.png-346a4ee01c391a77cc08b2c88a86c486.ctex"
+path="res://.godot/imported/default_parallax_tileset_1080height_05_clouds.png-fedd55b959d11de726e70a703e978f57.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://game/resources/biomes/backgrounds/default/default_parallax_tileset_1080height_05_clouds.png"
-dest_files=["res://.godot/imported/default_parallax_tileset_1080height_05_clouds.png-346a4ee01c391a77cc08b2c88a86c486.ctex"]
+source_file="res://resources/biomes/backgrounds/default/default_parallax_tileset_1080height_05_clouds.png"
+dest_files=["res://.godot/imported/default_parallax_tileset_1080height_05_clouds.png-fedd55b959d11de726e70a703e978f57.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cnxdreu72sq07"
-path="res://.godot/imported/Jump.png-2b017018d1704f08bfb0a52990234aca.ctex"
+path="res://.godot/imported/Jump.png-7875c880c759dd40c402a3c3d70cf62d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://game/resources/sprites/import/Samurai/Jump.png"
-dest_files=["res://.godot/imported/Jump.png-2b017018d1704f08bfb0a52990234aca.ctex"]
+source_file="res://resources/sprites/import/Samurai/Jump.png"
+dest_files=["res://.godot/imported/Jump.png-7875c880c759dd40c402a3c3d70cf62d.ctex"]
 
 [params]
 

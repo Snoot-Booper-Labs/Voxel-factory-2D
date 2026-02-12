@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://co2u4f1vr4hf2"
-path="res://.godot/imported/Idle.png-d92f47de31aa59ca5afbb641e8bc6f1b.ctex"
+path="res://.godot/imported/Idle.png-b5e9709fa1a0e1280404d574bb933b6a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://game/resources/sprites/import/Shinobi/Idle.png"
-dest_files=["res://.godot/imported/Idle.png-d92f47de31aa59ca5afbb641e8bc6f1b.ctex"]
+source_file="res://resources/sprites/import/Shinobi/Idle.png"
+dest_files=["res://.godot/imported/Idle.png-b5e9709fa1a0e1280404d574bb933b6a.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://es26gunafdcb"
-path="res://.godot/imported/Attack_2.png-6a42363ee1ab6758f4ae17983f9946da.ctex"
+path="res://.godot/imported/Attack_2.png-4e75582f5fb93d082371a9c1ae2a4007.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://game/resources/sprites/import/Shinobi/Attack_2.png"
-dest_files=["res://.godot/imported/Attack_2.png-6a42363ee1ab6758f4ae17983f9946da.ctex"]
+source_file="res://resources/sprites/import/Shinobi/Attack_2.png"
+dest_files=["res://.godot/imported/Attack_2.png-4e75582f5fb93d082371a9c1ae2a4007.ctex"]
 
 [params]
 
