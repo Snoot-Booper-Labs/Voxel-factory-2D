@@ -14,8 +14,9 @@ var inventory: Inventory
 @onready var input_manager: InputManager = $InputManager
 @onready var mining_controller: MiningController = $MiningController
 @onready var placement_controller: PlacementController = $PlacementController
+@onready var bgparallax_controller: BGParallax = $BGParallax
 
-const WORLD_SEED = 12345
+const WORLD_SEED = 1
 const INITIAL_RENDER_SIZE = 64
 const PLAYER_SPAWN_X = 0
 
@@ -44,6 +45,16 @@ func _ready() -> void:
 
 	# Spawn player above terrain
 	_spawn_player_above_terrain()
+
+	# Setup background parallax (after spawn so camera position is set)
+	bgparallax_controller.setup(player.get_node("Camera2D"))
+
+	# Debug logging
+	var cam = player.get_node("Camera2D") as Camera2D
+	var vp = get_viewport().get_visible_rect().size
+	# print("[Main] player.position=%s  tile=%s" % [player.position, WorldUtils.world_to_tile(player.position)])
+	# print("[Main] camera.zoom=%s  viewport=%s  visible_world=%s" % [cam.zoom, vp, vp / cam.zoom])
+	# print("[Main] surface_y=%d  surface_world_y=%d" % [_find_surface_y(PLAYER_SPAWN_X), -_find_surface_y(PLAYER_SPAWN_X) * WorldUtils.TILE_SIZE])
 
 
 func _spawn_player_above_terrain() -> void:

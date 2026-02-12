@@ -1,10 +1,7 @@
-[gd_resource type="Resource" script_class="PlayerMovementData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PlayerMovementData" format=3 uid="uid://dcrb2tioxktg6"]
 
-[ext_resource type="Script" path="res://game/scripts/player/player_movement_data.gd" id="1_move_data"]
+[ext_resource type="Script" uid="uid://c5iffykjtp1pv" path="res://game/scripts/player/player_movement_data.gd" id="1_move_data"]
 
 [resource]
 script = ExtResource("1_move_data")
-speed = 200.0
-walk_speed = 100.0
-jump_velocity = -400.0
-gravity = 980.0
+walk_speed = 75.0

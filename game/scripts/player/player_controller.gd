@@ -13,18 +13,22 @@ extends CharacterBody2D
 func _ready() -> void:
 	if not movement_data:
 		movement_data = load("res://game/resources/player/default_movement_data.tres")
+	# Jump velocity should be negative because Godot physics is inverted
+	if movement_data.jump_velocity > 0:
+		movement_data.jump_velocity *= -1
 
 
 # Movement state
 var move_direction: float = 0.0 # -1 left, 0 none, 1 right
 var wants_jump: bool = false
 var wants_walk: bool = false
+var _last_logged_pos: Vector2 = Vector2.INF
 
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
-	
+
 	if not movement_data:
 		return
 
@@ -36,7 +40,7 @@ func _physics_process(delta: float) -> void:
 	if wants_jump and is_on_floor():
 		velocity.y = movement_data.jump_velocity
 	wants_jump = false # Reset jump request
-	
+
 	# Determine speed based on walk state
 	var current_speed = movement_data.walk_speed if wants_walk else movement_data.speed
 
@@ -45,18 +49,24 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+	# Debug: log position when it changes by more than 1 tile
+	# if _last_logged_pos.distance_to(global_position) > WorldUtils.TILE_SIZE:
+	# 	var tile = WorldUtils.world_to_tile(global_position)
+	# 	# print("[Player] world=%s  tile=%s  velocity=%s" % [global_position, tile, velocity])
+	# 	_last_logged_pos = global_position
+
 	# Update animations
 	if not is_on_floor():
 		player_animated_sprite.play("jump")
 	else:
 		if velocity.x != 0:
-			# Use walk speed threshold for animation logic if needed, 
+			# Use walk speed threshold for animation logic if needed,
 			# but generally if moving and wants_walk is true, play walk.
-			# Or rely on speed check. 
-			# Since walk_speed is 100, we might need to adjust the animation threshold logic 
+			# Or rely on speed check.
+			# Since walk_speed is 100, we might need to adjust the animation threshold logic
 			# or just check detailed state.
 			# Let's use simple logic: if abs(velocity.x) > walk_speed, run, else walk.
-			# But if walk_speed is exactly 100, > 100 might fail for walk. 
+			# But if walk_speed is exactly 100, > 100 might fail for walk.
 			# Let's say > walk_speed + epsilon for run.
 			# Or better: check wants_walk. But velocity is the source of truth for physics.
 			if abs(velocity.x) > movement_data.walk_speed:

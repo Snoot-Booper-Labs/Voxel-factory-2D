@@ -1,22 +1,73 @@
 [gd_scene format=3 uid="uid://bvxk2r4m6c5qa"]
 
 [ext_resource type="Script" uid="uid://bnv7id5xx1656" path="res://game/scripts/main.gd" id="1_main"]
+[ext_resource type="Texture2D" uid="uid://btnesx3wh73sd" path="res://game/resources/biomes/backgrounds/default/default_parallax_tileset_1080height_05_clouds.png" id="2_12hk3"]
 [ext_resource type="Script" uid="uid://b7wuulkoyytj2" path="res://game/scripts/rendering/world_renderer.gd" id="2_renderer"]
+[ext_resource type="Texture2D" uid="uid://c6pdbv338lvw1" path="res://game/resources/biomes/backgrounds/default/default_parallax_tileset_1080height_04_hills.png" id="3_3v7cf"]
 [ext_resource type="PackedScene" uid="uid://cqcyk7qp27o0y" path="res://game/scenes/player.tscn" id="3_player"]
 [ext_resource type="Script" uid="uid://c2tlc18nky06c" path="res://game/scripts/player/input_manager.gd" id="4_input_manager"]
+[ext_resource type="Texture2D" uid="uid://bau3arya4vt6n" path="res://game/resources/biomes/backgrounds/default/default_parallax_tileset_1080height_03_distant_trees.png" id="4_r75lq"]
+[ext_resource type="Texture2D" uid="uid://b1jq650ksqw54" path="res://game/resources/biomes/backgrounds/default/default_parallax_tileset_1080height_02_trees.png" id="5_cxktm"]
 [ext_resource type="Script" uid="uid://ccikwm45c0wv8" path="res://game/scripts/player/mining_controller.gd" id="5_mining_controller"]
+[ext_resource type="Texture2D" uid="uid://tmpihb37coyn" path="res://game/resources/biomes/backgrounds/default/default_parallax_tileset_1080height_01_ground.png" id="6_3v7cf"]
 [ext_resource type="Script" uid="uid://bkgc1f2uawsps" path="res://game/scripts/player/placement_controller.gd" id="6_placement_controller"]
 [ext_resource type="Script" uid="uid://culfwwda34j6v" path="res://game/scripts/ui/hotbar_ui.gd" id="7_hotbar_ui"]
 [ext_resource type="Script" uid="uid://dnq2c360rifwy" path="res://game/scripts/ui/inventory_ui.gd" id="8_inventory_ui"]
+[ext_resource type="Script" uid="uid://7vn3lfhlo3pf" path="res://game/scripts/rendering/bgparallax_controller.gd" id="9_bg_controller"]
 
 [node name="Main" type="Node2D" unique_id=1968948221]
 script = ExtResource("1_main")
+
+[node name="BGParallax" type="CanvasLayer" parent="." unique_id=1795876453]
+layer = -100
+script = ExtResource("9_bg_controller")
+
+[node name="BGParallax_Sky" type="Parallax2D" parent="BGParallax" unique_id=1657918803]
+scroll_scale = Vector2(0.1, 0.5)
+
+[node name="Sprite2D" type="Sprite2D" parent="BGParallax/BGParallax_Sky" unique_id=1194958861]
+editor_description = "Parallax Texture: Sky"
+texture = ExtResource("2_12hk3")
+centered = false
+
+[node name="BGParallax_Hills" type="Parallax2D" parent="BGParallax" unique_id=2075613997]
+scroll_scale = Vector2(0.2, 0.5)
+
+[node name="Sprite2D" type="Sprite2D" parent="BGParallax/BGParallax_Hills" unique_id=801127838]
+editor_description = "Parallax Texture: Hills"
+texture = ExtResource("3_3v7cf")
+centered = false
+
+[node name="BGParallax_TreesFar" type="Parallax2D" parent="BGParallax" unique_id=15364839]
+scroll_scale = Vector2(0.4, 0.5)
+
+[node name="Sprite2D" type="Sprite2D" parent="BGParallax/BGParallax_TreesFar" unique_id=364117008]
+editor_description = "Parallax Texture: Trees Far"
+texture = ExtResource("4_r75lq")
+centered = false
+
+[node name="BGParallax_TreesNear" type="Parallax2D" parent="BGParallax" unique_id=1822488643]
+scroll_scale = Vector2(0.6, 0.5)
+
+[node name="Sprite2D" type="Sprite2D" parent="BGParallax/BGParallax_TreesNear" unique_id=1450752586]
+editor_description = "Parallax Texture: Trees Near"
+texture = ExtResource("5_cxktm")
+centered = false
+
+[node name="BGParallax_Ground" type="Parallax2D" parent="BGParallax" unique_id=706126098]
+scroll_scale = Vector2(0.6, 0.5)
+
+[node name="Sprite2D" type="Sprite2D" parent="BGParallax/BGParallax_Ground" unique_id=909433852]
+editor_description = "Parallax Texture: Ground"
+texture = ExtResource("6_3v7cf")
+centered = false
 
 [node name="WorldRenderer" type="Node2D" parent="." unique_id=128519910]
 script = ExtResource("2_renderer")
 
 [node name="Player" parent="." unique_id=1760623144 instance=ExtResource("3_player")]
-position = Vector2(576, 325)
+scale = Vector2(2, 2)
+safe_margin = 0.001
 
 [node name="InputManager" type="Node" parent="." unique_id=759401086]
 script = ExtResource("4_input_manager")
