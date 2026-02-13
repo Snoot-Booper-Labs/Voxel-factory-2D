@@ -14,6 +14,10 @@ var _target_pos: Vector2
 var _mine_progress: float = 0.0
 var _current_mining_block_pos: Vector2i
 
+func _ready() -> void:
+	add_to_group("miners")
+
+
 func _init() -> void:
 	# Add required components
 	add_component(Inventory.new())
@@ -152,15 +156,9 @@ func _complete_mining(block_type: int) -> void:
 	# Add to inventory
 	var drops = BlockData.get_block_drops(block_type)
 	if drops.item != "" and drops.count > 0:
-		# Find ItemType ID from name (simple lookup or data method needed)
-		# For now, simplistic mapping or skipping string lookup if ItemData doesn't support it easily
-		# Actually ItemData needs ID.
-		# BlockData stores string names "dirt", "cobblestone".
-		# ItemData stores "Dirt", "Cobblestone".
-		# I need a helper to get ItemID from name or directly from BlockType.
-		# Temporary: specific drop logic or use BlockType directly if usually 1:1?
-		# ItemData.get_item_from_block(block_type) would be useful.
-		pass
+		var item_type = ItemData.get_type_from_name(drops.item)
+		if item_type != ItemData.ItemType.NONE:
+			get_inventory().add_item(item_type, drops.count)
 
 	# Remove block
 	tile_world.set_block(_current_mining_block_pos.x, _current_mining_block_pos.y, BlockData.BlockType.AIR)

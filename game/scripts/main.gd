@@ -11,6 +11,7 @@ var inventory: Inventory
 @onready var player: PlayerController = $Player
 @onready var hotbar_ui: HotbarUI = $CanvasLayer/HotbarUI
 @onready var inventory_ui: InventoryUI = $CanvasLayer/InventoryUI
+@onready var miner_inventory_ui: InventoryUI = $CanvasLayer/MinerInventoryUI
 @onready var input_manager: InputManager = $InputManager
 @onready var mining_controller: MiningController = $MiningController
 @onready var placement_controller: PlacementController = $PlacementController
@@ -41,7 +42,7 @@ func _ready() -> void:
 	inventory_ui.setup(inventory)
 
 	# Setup input manager
-	input_manager.setup(player, mining_controller, placement_controller, hotbar_ui, inventory_ui)
+	input_manager.setup(player, mining_controller, placement_controller, hotbar_ui, inventory_ui, miner_inventory_ui)
 
 	# Spawn player above terrain
 	_spawn_player_above_terrain()

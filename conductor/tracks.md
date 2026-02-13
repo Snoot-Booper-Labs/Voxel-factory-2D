@@ -3,6 +3,7 @@
 ## Active Tracks
 
 - [Editor UI UX](./tracks/editor-ui-ux/index.md) - Improve the Godot Editor experience for the game UI and Player entity.
+- [Miner Inventory Access](./tracks/miner-inventory-ui/index.md) - Create UI for accessing miner inventory.
 
 ## Completed Tracks
 
