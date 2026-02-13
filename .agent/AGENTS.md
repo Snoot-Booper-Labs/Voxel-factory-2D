@@ -14,7 +14,7 @@ The **Conductor** is the central nervous system for context-driven development i
 
 The `docs/` folder contains static documentation regarding the project's design, architecture, and mechanics.
 
-*   **[docs/index.md](../docs/index.md)**: Overview of the project documentation.
+*   **[docs/README.md](../docs/README.md)**: Overview of the project documentation.
 *   **[docs/architecture.md](../docs/architecture.md)**: High-level architecture and code organization.
 *   **[docs/gameplay.md](../docs/gameplay.md)**: Explanation of gameplay mechanics.
 *   **[docs/api_reference.md](../docs/api_reference.md)**: API reference for core systems.
