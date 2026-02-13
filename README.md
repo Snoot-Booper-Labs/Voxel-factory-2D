@@ -18,13 +18,17 @@ Starting as a familiar block-building and mining experience, the game gradually 
 
 ## 📚 Documentation
 
-Detailed documentation is available in the **[docs](docs/README.md)** directory. You can also view the **[Project Conductor Index](conductor/index.md)** for project management and planning.
+Comprehensive documentation is available in the **[docs](docs/README.md)** directory:
 
-### Quick Links
-*   **[Gameplay Guide](docs/gameplay.md)** - Your first steps in Voxel Factory 2D.
-*   **[Controls](docs/controls.md)** - Key bindings and input reference.
-*   **[Architecture](docs/architecture.md)** - For developers interested in the ECS and system design.
-*   **[Content Creation](docs/content_creation.md)** - How to add new blocks and items.
+- **[Gameplay Guide](docs/gameplay.md)** - Your first steps in Voxel Factory 2D
+- **[Controls](docs/controls.md)** - Key bindings and input reference
+- **[Architecture Overview](docs/architecture.md)** - High-level system design and data flow
+- **[ECS Design Guide](docs/ecs-design.md)** - Deep dive into Entity-Component-System patterns and best practices
+- **[Development Roadmap](docs/ROADMAP.md)** - Project milestones, feature timeline, and development tasks
+- **[Content Creation](docs/content_creation.md)** - How to add new blocks, items, and entities
+- **[API Reference](docs/api_reference.md)** - Detailed class and method documentation
+
+**Project Management**: [Conductor Index](conductor/index.md) - Active tracks, product definition, and workflow.
 
 ## ✨ Features
 
