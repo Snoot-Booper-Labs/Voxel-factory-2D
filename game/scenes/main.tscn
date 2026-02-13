@@ -15,6 +15,44 @@
 [ext_resource type="Script" uid="uid://dnq2c360rifwy" path="res://scripts/ui/inventory_ui.gd" id="8_inventory_ui"]
 [ext_resource type="Script" uid="uid://7vn3lfhlo3pf" path="res://scripts/rendering/bgparallax_controller.gd" id="9_bg_controller"]
 
+[sub_resource type="Animation" id="Animation_a8y0u"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(0.38278243, 0.4757207, 0.9323042, 0.39215687)]
+}
+
+[sub_resource type="Animation" id="Animation_jkv2x"]
+resource_name = "bgparallax_color_fade"
+length = 32.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 16, 32),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(0.38278243, 0.4757207, 0.9323042, 0.39215687), Color(0.38039216, 0.15686275, 0.6039216, 0.5882353), Color(0.38278243, 0.4757207, 0.9323042, 0.39215687)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_jbj1t"]
+_data = {
+&"RESET": SubResource("Animation_a8y0u"),
+&"bgparallax_color_fade": SubResource("Animation_jkv2x")
+}
+
 [node name="Main" type="Node2D" unique_id=1968948221]
 script = ExtResource("1_main")
 
@@ -62,6 +100,15 @@ editor_description = "Parallax Texture: Ground"
 texture = ExtResource("6_3v7cf")
 centered = false
 
+[node name="BGParallax_Overlay" type="ColorRect" parent="BGParallax" unique_id=1240300602]
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.38278243, 0.4757207, 0.9323042, 0.39215687)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="BGParallax/BGParallax_Overlay" unique_id=104707621]
+libraries/ = SubResource("AnimationLibrary_jbj1t")
+autoplay = &"bgparallax_color_fade"
+
 [node name="WorldRenderer" type="Node2D" parent="." unique_id=128519910]
 script = ExtResource("2_renderer")
 
@@ -106,6 +153,21 @@ offset_left = -252.0
 offset_top = -323.0
 offset_right = 252.00006
 offset_bottom = -79.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("8_inventory_ui")
+
+[node name="MinerInventoryUI" type="Control" parent="CanvasLayer" unique_id=2082647550]
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -252.0
+offset_top = -574.0
+offset_right = 252.0
+offset_bottom = -330.0
 grow_horizontal = 2
 grow_vertical = 0
 script = ExtResource("8_inventory_ui")

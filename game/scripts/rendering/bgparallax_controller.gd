@@ -1,7 +1,7 @@
 class_name BGParallax
 extends Node
 ## Dynamically scales and positions parallax background layers
-
+@onready var overlay = $BGParallax_Overlay
 
 func setup(camera: Camera2D) -> void:
 	for sibling in get_children():
