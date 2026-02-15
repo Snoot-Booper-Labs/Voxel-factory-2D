@@ -7,6 +7,7 @@ var placement_controller: PlacementController
 var hotbar_ui: HotbarUI
 var inventory_ui: InventoryUI
 var miner_inventory_ui: InventoryUI
+var pause_menu: PauseMenuController
 var active_miner_entity: Miner = null
 
 signal save_requested
@@ -23,7 +24,21 @@ func setup(player: PlayerController, mining: MiningController, placement: Placem
 	inventory_ui = inv_ui
 	miner_inventory_ui = miner_inv_ui
 
+
+func set_pause_menu(menu: PauseMenuController) -> void:
+	pause_menu = menu
+	# InputManager must process even while paused so it can handle ESC to unpause
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
 func _process(_delta: float) -> void:
+	# Always handle pause menu input, even while paused
+	_handle_pause_menu()
+
+	# Block all game input while paused
+	if get_tree().paused:
+		return
+
 	if player_controller:
 		# Update player position for range checks
 		var player_pos = player_controller.global_position
@@ -82,6 +97,34 @@ func _handle_actions() -> void:
 			placement_controller.try_place_at(player_controller.get_global_mouse_position())
 
 
+func _handle_pause_menu() -> void:
+	if not Input.is_action_just_pressed("pause_menu"):
+		return
+
+	if pause_menu == null:
+		return
+
+	# Priority 1: If pause menu is open, close it (resume)
+	if pause_menu.is_open():
+		pause_menu.close()
+		return
+
+	# Priority 2: If inventory or miner UI is open, close that first
+	if inventory_ui and inventory_ui.is_open():
+		if inventory_ui.is_holding():
+			inventory_ui.cancel_held()
+		else:
+			inventory_ui.close()
+		return
+
+	if miner_inventory_ui and miner_inventory_ui.is_open():
+		_close_miner_inventory()
+		return
+
+	# Priority 3: Nothing else open, open pause menu
+	pause_menu.open()
+
+
 func _handle_ui() -> void:
 	if Input.is_action_just_pressed("inventory_toggle"):
 		if inventory_ui:
@@ -89,16 +132,6 @@ func _handle_ui() -> void:
 
 	if Input.is_action_just_pressed("interact"):
 		_handle_interaction()
-
-	if Input.is_key_pressed(KEY_ESCAPE):
-		if inventory_ui and inventory_ui.is_open():
-			# Cancel held item first, then close on next ESC press
-			if inventory_ui.is_holding():
-				inventory_ui.cancel_held()
-			else:
-				inventory_ui.close()
-
-		_close_miner_inventory()
 
 
 func _check_miner_distance() -> void:

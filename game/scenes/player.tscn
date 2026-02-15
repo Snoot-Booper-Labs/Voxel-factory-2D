@@ -262,6 +262,7 @@ script = ExtResource("1_script")
 movement_data = ExtResource("2_nggnu")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=656855919]
+zoom = Vector2(1, 1)
 position_smoothing_enabled = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=277996202]

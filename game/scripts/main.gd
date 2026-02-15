@@ -18,6 +18,7 @@ var save_manager: SaveManager
 @onready var mining_controller: MiningController = $MiningController
 @onready var placement_controller: PlacementController = $PlacementController
 @onready var bgparallax_controller: BGParallax = $BGParallax
+@onready var pause_menu: PauseMenuController = $CanvasLayer/PauseMenu
 
 const WORLD_SEED = 1
 const INITIAL_RENDER_SIZE = 64
@@ -52,6 +53,12 @@ func _ready() -> void:
 	input_manager.setup(player, mining_controller, placement_controller, hotbar_ui, inventory_ui, miner_inventory_ui)
 	input_manager.save_requested.connect(_on_save_requested)
 	input_manager.load_requested.connect(_on_load_requested)
+
+	# Setup pause menu
+	input_manager.set_pause_menu(pause_menu)
+	pause_menu.save_requested.connect(_on_pause_save_requested)
+	pause_menu.load_requested.connect(_on_pause_load_requested)
+	pause_menu.set_camera(player.get_node("Camera2D"))
 
 	# Setup background parallax (after spawn so camera position is set)
 	bgparallax_controller.setup(player.get_node("Camera2D"))
@@ -105,6 +112,20 @@ func _on_save_requested() -> void:
 		print("[Main] Game saved successfully")
 	else:
 		print("[Main] Failed to save game")
+
+
+func _on_pause_save_requested() -> void:
+	_update_save_manager_refs()
+	var success := save_manager.save_game()
+	pause_menu.show_save_feedback(success)
+	if success:
+		print("[Main] Game saved via pause menu")
+	else:
+		print("[Main] Failed to save game via pause menu")
+
+
+func _on_pause_load_requested() -> void:
+	_on_load_requested()
 
 
 func _on_load_requested() -> void:
