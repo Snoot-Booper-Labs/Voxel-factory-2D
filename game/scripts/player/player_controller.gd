@@ -96,3 +96,17 @@ func stop() -> void:
 	move_direction = 0.0
 	wants_jump = false
 	wants_walk = false
+
+
+## Serialize player state to a dictionary
+func serialize() -> Dictionary:
+	return {
+		"position": {"x": position.x, "y": position.y},
+	}
+
+
+## Restore player state from a dictionary
+func deserialize(data: Dictionary) -> void:
+	var pos_data: Dictionary = data.get("position", {})
+	if pos_data.has("x") and pos_data.has("y"):
+		position = Vector2(float(pos_data["x"]), float(pos_data["y"]))

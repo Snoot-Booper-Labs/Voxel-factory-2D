@@ -170,6 +170,30 @@ func swap_slots(index_a: int, index_b: int) -> void:
 	inventory_updated.emit()
 
 
+## Serialize inventory to a sparse array of non-empty slots.
+## Format: [{"slot": index, "item": type, "count": n}, ...]
+func serialize() -> Array:
+	var result: Array = []
+	for i in range(_slots.size()):
+		var slot := _slots[i]
+		if slot.item != NONE and slot.count > 0:
+			result.append({"slot": i, "item": slot.item, "count": slot.count})
+	return result
+
+
+## Deserialize inventory from a sparse array of slot dictionaries.
+## Clears all slots first, then restores only the saved non-empty ones.
+func deserialize(data: Array) -> void:
+	_initialize_slots()
+	for entry in data:
+		if entry is Dictionary and entry.has("slot") and entry.has("item") and entry.has("count"):
+			var idx: int = int(entry["slot"])
+			if idx >= 0 and idx < _slots.size():
+				_slots[idx].item = int(entry["item"])
+				_slots[idx].count = int(entry["count"])
+	inventory_updated.emit()
+
+
 ## Move items from one slot to another. If the target slot has the same item type,
 ## items are stacked. If different types, the slots are swapped.
 ## If shift is true, moves the entire stack to the target slot.
