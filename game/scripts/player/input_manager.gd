@@ -88,9 +88,9 @@ func _handle_ui() -> void:
 
 	if Input.is_key_pressed(KEY_ESCAPE):
 		if inventory_ui and inventory_ui.is_open():
-			# Deselect first, then close on next ESC press
-			if inventory_ui.get_selected_slot() >= 0:
-				inventory_ui.deselect()
+			# Cancel held item first, then close on next ESC press
+			if inventory_ui.is_holding():
+				inventory_ui.cancel_held()
 			else:
 				inventory_ui.close()
 

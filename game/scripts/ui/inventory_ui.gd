@@ -4,7 +4,10 @@ extends Control
 ## Full inventory grid panel
 ##
 ## Displays all inventory slots in a grid. Opens/closes with toggle.
-## Supports click-to-select and shift-click-to-move items between slots.
+## Click a non-empty slot to "pick up" the item (highlights slot, changes cursor).
+## Click another slot to "drop" it there (move/stack/swap). Click same slot or
+## press ESC to cancel. Picking up is visual only -- the item stays in the slot
+## until it is placed somewhere.
 
 signal slot_clicked(slot_index: int)
 
@@ -16,12 +19,18 @@ const COLOR_NORMAL := Color(1, 1, 1)
 const COLOR_SELECTED := Color(1.2, 1.2, 0.8)
 const COLOR_HOVER := Color(1.1, 1.1, 1.1)
 
+## Cursor shown while an item is "held"
+const CURSOR_HELD := Control.CURSOR_DRAG
+## Default cursor for hovering over a slot
+const CURSOR_DEFAULT := Control.CURSOR_POINTING_HAND
+
 var inventory: Inventory
 var _slot_panels: Array[Panel] = []
 var _slot_labels: Array[Label] = []
 var _name_labels: Array[Label] = []
 var _is_open: bool = false
-var _selected_slot: int = -1
+## Index of the slot whose item the player is "holding", or -1
+var _held_slot: int = -1
 
 
 func _ready() -> void:
@@ -70,11 +79,11 @@ func _create_grid() -> void:
 		var panel = Panel.new()
 		panel.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
-		panel.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		panel.mouse_default_cursor_shape = CURSOR_DEFAULT
 		grid.add_child(panel)
 		_slot_panels.append(panel)
 
-		# Connect mouse input for click-to-select
+		# Connect mouse input for click interactions
 		var slot_index = i
 		panel.gui_input.connect(_on_slot_gui_input.bind(slot_index))
 		panel.mouse_entered.connect(_on_slot_mouse_entered.bind(slot_index))
@@ -115,7 +124,7 @@ func toggle() -> void:
 	if _is_open:
 		_refresh_all_slots()
 	else:
-		deselect()
+		cancel_held()
 
 
 func open() -> void:
@@ -127,50 +136,65 @@ func open() -> void:
 func close() -> void:
 	_is_open = false
 	visible = false
-	deselect()
+	cancel_held()
 
 
 func is_open() -> bool:
 	return _is_open
 
 
-## Returns the currently selected slot index, or -1 if none selected
+# =========================================================================
+# Held-item API
+# =========================================================================
+
+## Returns the slot index of the item being held, or -1 if nothing held
+func get_held_slot() -> int:
+	return _held_slot
+
+
+## True when the player is holding an item
+func is_holding() -> bool:
+	return _held_slot >= 0
+
+
+## Cancel the current hold -- put nothing down, restore cursor
+func cancel_held() -> void:
+	_held_slot = -1
+	_update_visuals()
+
+
+# Legacy alias kept for InputManager compatibility
 func get_selected_slot() -> int:
-	return _selected_slot
+	return _held_slot
 
 
-## Select a specific slot by index
-func select_slot(index: int) -> void:
-	if index < 0 or index >= _slot_panels.size():
-		return
-	_selected_slot = index
-	_update_selection_visual()
-	slot_clicked.emit(index)
-
-
-## Deselect the currently selected slot
 func deselect() -> void:
-	_selected_slot = -1
-	_update_selection_visual()
+	cancel_held()
 
 
-## Handle a click on a slot. If shift is held and a slot is already selected,
-## moves the item from the selected slot to the clicked slot.
-## Otherwise, selects the clicked slot (or deselects if clicking the same slot).
-func handle_slot_click(slot_index: int, shift_held: bool) -> void:
+# =========================================================================
+# Click handling
+# =========================================================================
+
+## Core interaction: first click picks up, second click drops.
+func handle_slot_click(slot_index: int) -> void:
 	if inventory == null:
 		return
 
-	if shift_held and _selected_slot >= 0 and _selected_slot != slot_index:
-		# Move/stack items from selected slot to clicked slot
-		inventory.move_slot(_selected_slot, slot_index)
-		deselect()
-	elif _selected_slot == slot_index:
-		# Clicking same slot deselects
-		deselect()
+	if _held_slot < 0:
+		# Nothing held yet -- pick up if slot is non-empty
+		var slot_data = inventory.get_slot(slot_index)
+		if slot_data.item != 0 and slot_data.count > 0:
+			_held_slot = slot_index
+			_update_visuals()
+			slot_clicked.emit(slot_index)
+	elif _held_slot == slot_index:
+		# Clicking the same slot cancels the hold
+		cancel_held()
 	else:
-		# Select the clicked slot
-		select_slot(slot_index)
+		# Drop onto a different slot (move / stack / swap)
+		inventory.move_slot(_held_slot, slot_index)
+		cancel_held()
 
 
 func _on_slot_gui_input(event: InputEvent, slot_index: int) -> void:
@@ -180,29 +204,44 @@ func _on_slot_gui_input(event: InputEvent, slot_index: int) -> void:
 	if event is InputEventMouseButton:
 		var mb = event as InputEventMouseButton
 		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			handle_slot_click(slot_index, mb.shift_pressed)
+			handle_slot_click(slot_index)
 
 
 func _on_slot_mouse_entered(slot_index: int) -> void:
 	if Engine.is_editor_hint():
 		return
-	if slot_index != _selected_slot:
+	if slot_index != _held_slot:
 		_slot_panels[slot_index].modulate = COLOR_HOVER
 
 
 func _on_slot_mouse_exited(slot_index: int) -> void:
 	if Engine.is_editor_hint():
 		return
-	if slot_index != _selected_slot:
+	if slot_index != _held_slot:
 		_slot_panels[slot_index].modulate = COLOR_NORMAL
+
+
+# =========================================================================
+# Visuals
+# =========================================================================
+
+func _update_visuals() -> void:
+	_update_selection_visual()
+	_update_cursor()
 
 
 func _update_selection_visual() -> void:
 	for i in range(_slot_panels.size()):
-		if i == _selected_slot:
+		if i == _held_slot:
 			_slot_panels[i].modulate = COLOR_SELECTED
 		else:
 			_slot_panels[i].modulate = COLOR_NORMAL
+
+
+func _update_cursor() -> void:
+	var shape = CURSOR_HELD if _held_slot >= 0 else CURSOR_DEFAULT
+	for panel in _slot_panels:
+		panel.mouse_default_cursor_shape = shape
 
 
 func _on_inventory_updated() -> void:
