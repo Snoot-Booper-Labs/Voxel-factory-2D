@@ -134,3 +134,74 @@ func can_add_item(item_type: int, count: int) -> bool:
 			return true
 
 	return false
+
+
+## Set the contents of a specific slot directly
+func set_slot(slot_index: int, item_type: int, count: int) -> void:
+	if slot_index < 0 or slot_index >= _slots.size():
+		return
+
+	if count <= 0:
+		_slots[slot_index].item = NONE
+		_slots[slot_index].count = 0
+	else:
+		_slots[slot_index].item = item_type
+		_slots[slot_index].count = count
+
+	inventory_updated.emit()
+
+
+## Swap the contents of two slots
+func swap_slots(index_a: int, index_b: int) -> void:
+	if index_a < 0 or index_a >= _slots.size():
+		return
+	if index_b < 0 or index_b >= _slots.size():
+		return
+	if index_a == index_b:
+		return
+
+	var temp_item = _slots[index_a].item
+	var temp_count = _slots[index_a].count
+	_slots[index_a].item = _slots[index_b].item
+	_slots[index_a].count = _slots[index_b].count
+	_slots[index_b].item = temp_item
+	_slots[index_b].count = temp_count
+
+	inventory_updated.emit()
+
+
+## Move items from one slot to another. If the target slot has the same item type,
+## items are stacked. If different types, the slots are swapped.
+## If shift is true, moves the entire stack to the target slot.
+func move_slot(from_index: int, to_index: int) -> void:
+	if from_index < 0 or from_index >= _slots.size():
+		return
+	if to_index < 0 or to_index >= _slots.size():
+		return
+	if from_index == to_index:
+		return
+
+	var from_slot = _slots[from_index]
+	var to_slot = _slots[to_index]
+
+	# If target is empty, just move
+	if to_slot.item == NONE:
+		_slots[to_index].item = from_slot.item
+		_slots[to_index].count = from_slot.count
+		_slots[from_index].item = NONE
+		_slots[from_index].count = 0
+	# If same item type, try to stack
+	elif to_slot.item == from_slot.item:
+		var space = MAX_STACK - to_slot.count
+		var to_move = mini(from_slot.count, space)
+		_slots[to_index].count += to_move
+		_slots[from_index].count -= to_move
+		if _slots[from_index].count <= 0:
+			_slots[from_index].item = NONE
+			_slots[from_index].count = 0
+	# Different types: swap
+	else:
+		swap_slots(from_index, to_index)
+		return  # swap_slots already emits
+
+	inventory_updated.emit()

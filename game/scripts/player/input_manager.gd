@@ -64,6 +64,10 @@ func _handle_actions() -> void:
 	if player_controller == null:
 		return
 
+	# Block mining/placing when inventory is open
+	if inventory_ui and inventory_ui.is_open():
+		return
+
 	# simple click-to-interact
 	if Input.is_action_pressed("mine"):
 		if mining_controller:
@@ -84,7 +88,11 @@ func _handle_ui() -> void:
 
 	if Input.is_key_pressed(KEY_ESCAPE):
 		if inventory_ui and inventory_ui.is_open():
-			inventory_ui.close()
+			# Cancel held item first, then close on next ESC press
+			if inventory_ui.is_holding():
+				inventory_ui.cancel_held()
+			else:
+				inventory_ui.close()
 
 		_close_miner_inventory()
 
