@@ -292,3 +292,189 @@ func test_remove_item_emits_signal():
 	watch_signals(inventory)
 	inventory.remove_item(0, 5)
 	assert_signal_emitted(inventory, "inventory_updated", "remove_item should emit inventory_updated signal")
+
+
+# =============================================================================
+# set_slot Tests
+# =============================================================================
+
+func test_set_slot_sets_item_and_count():
+	var inventory = Inventory.new()
+	inventory.set_slot(0, 1, 10)
+	var slot = inventory.get_slot(0)
+	assert_eq(slot.item, 1, "set_slot should set item type")
+	assert_eq(slot.count, 10, "set_slot should set count")
+
+
+func test_set_slot_clears_when_count_zero():
+	var inventory = Inventory.new()
+	inventory.set_slot(0, 1, 10)
+	inventory.set_slot(0, 1, 0)
+	var slot = inventory.get_slot(0)
+	assert_eq(slot.item, NONE, "set_slot with count 0 should clear item type")
+	assert_eq(slot.count, 0, "set_slot with count 0 should set count to 0")
+
+
+func test_set_slot_clears_when_count_negative():
+	var inventory = Inventory.new()
+	inventory.set_slot(0, 1, 10)
+	inventory.set_slot(0, 1, -5)
+	var slot = inventory.get_slot(0)
+	assert_eq(slot.item, NONE, "set_slot with negative count should clear slot")
+	assert_eq(slot.count, 0, "set_slot with negative count should set count to 0")
+
+
+func test_set_slot_invalid_index_does_nothing():
+	var inventory = Inventory.new()
+	inventory.set_slot(-1, 1, 10)
+	inventory.set_slot(100, 1, 10)
+	# Should not crash - all slots remain empty
+	for i in range(DEFAULT_SIZE):
+		var slot = inventory.get_slot(i)
+		assert_eq(slot.item, NONE, "Invalid set_slot should not modify any slot")
+
+
+func test_set_slot_emits_signal():
+	var inventory = Inventory.new()
+	watch_signals(inventory)
+	inventory.set_slot(0, 1, 10)
+	assert_signal_emitted(inventory, "inventory_updated", "set_slot should emit inventory_updated signal")
+
+
+# =============================================================================
+# swap_slots Tests
+# =============================================================================
+
+func test_swap_slots_swaps_contents():
+	var inventory = Inventory.new()
+	inventory.add_item(1, 10)
+	inventory.add_item(2, 20)
+	inventory.swap_slots(0, 1)
+	var slot0 = inventory.get_slot(0)
+	var slot1 = inventory.get_slot(1)
+	assert_eq(slot0.item, 2, "Slot 0 should now have item type 2")
+	assert_eq(slot0.count, 20, "Slot 0 should now have count 20")
+	assert_eq(slot1.item, 1, "Slot 1 should now have item type 1")
+	assert_eq(slot1.count, 10, "Slot 1 should now have count 10")
+
+
+func test_swap_slots_with_empty_slot():
+	var inventory = Inventory.new()
+	inventory.add_item(1, 10)
+	inventory.swap_slots(0, 5)
+	var slot0 = inventory.get_slot(0)
+	var slot5 = inventory.get_slot(5)
+	assert_eq(slot0.item, NONE, "Slot 0 should be empty after swap")
+	assert_eq(slot5.item, 1, "Slot 5 should have the item after swap")
+	assert_eq(slot5.count, 10, "Slot 5 should have correct count after swap")
+
+
+func test_swap_slots_same_index_does_nothing():
+	var inventory = Inventory.new()
+	inventory.add_item(1, 10)
+	watch_signals(inventory)
+	inventory.swap_slots(0, 0)
+	var slot = inventory.get_slot(0)
+	assert_eq(slot.item, 1, "Same-index swap should not change item")
+	assert_eq(slot.count, 10, "Same-index swap should not change count")
+	assert_signal_not_emitted(inventory, "inventory_updated", "Same-index swap should not emit signal")
+
+
+func test_swap_slots_invalid_index_does_nothing():
+	var inventory = Inventory.new()
+	inventory.add_item(1, 10)
+	inventory.swap_slots(-1, 0)
+	inventory.swap_slots(0, 100)
+	var slot = inventory.get_slot(0)
+	assert_eq(slot.item, 1, "Invalid swap should not change slot")
+	assert_eq(slot.count, 10, "Invalid swap should not change count")
+
+
+func test_swap_slots_emits_signal():
+	var inventory = Inventory.new()
+	inventory.add_item(1, 10)
+	inventory.add_item(2, 20)
+	watch_signals(inventory)
+	inventory.swap_slots(0, 1)
+	assert_signal_emitted(inventory, "inventory_updated", "swap_slots should emit inventory_updated signal")
+
+
+# =============================================================================
+# move_slot Tests
+# =============================================================================
+
+func test_move_slot_to_empty_slot():
+	var inventory = Inventory.new()
+	inventory.add_item(1, 10)
+	inventory.move_slot(0, 5)
+	var slot0 = inventory.get_slot(0)
+	var slot5 = inventory.get_slot(5)
+	assert_eq(slot0.item, NONE, "Source slot should be empty after move")
+	assert_eq(slot5.item, 1, "Target slot should have the item")
+	assert_eq(slot5.count, 10, "Target slot should have correct count")
+
+
+func test_move_slot_stacks_same_type():
+	var inventory = Inventory.new()
+	inventory.set_slot(0, 1, 10)
+	inventory.set_slot(1, 1, 20)
+	inventory.move_slot(0, 1)
+	var slot0 = inventory.get_slot(0)
+	var slot1 = inventory.get_slot(1)
+	assert_eq(slot0.item, NONE, "Source should be empty when fully stacked")
+	assert_eq(slot1.item, 1, "Target should have the item")
+	assert_eq(slot1.count, 30, "Target should have combined count")
+
+
+func test_move_slot_stacks_partial_when_target_near_full():
+	var inventory = Inventory.new()
+	inventory.set_slot(0, 1, 20)
+	inventory.set_slot(1, 1, 50)
+	inventory.move_slot(0, 1)
+	var slot0 = inventory.get_slot(0)
+	var slot1 = inventory.get_slot(1)
+	assert_eq(slot1.count, MAX_STACK, "Target should be at max stack")
+	assert_eq(slot0.count, 6, "Source should have remaining items (20 - 14 = 6)")
+	assert_eq(slot0.item, 1, "Source should still have the item type")
+
+
+func test_move_slot_swaps_different_types():
+	var inventory = Inventory.new()
+	inventory.set_slot(0, 1, 10)
+	inventory.set_slot(1, 2, 20)
+	inventory.move_slot(0, 1)
+	var slot0 = inventory.get_slot(0)
+	var slot1 = inventory.get_slot(1)
+	assert_eq(slot0.item, 2, "Source should now have target's old item")
+	assert_eq(slot0.count, 20, "Source should have target's old count")
+	assert_eq(slot1.item, 1, "Target should now have source's old item")
+	assert_eq(slot1.count, 10, "Target should have source's old count")
+
+
+func test_move_slot_same_index_does_nothing():
+	var inventory = Inventory.new()
+	inventory.add_item(1, 10)
+	watch_signals(inventory)
+	inventory.move_slot(0, 0)
+	var slot = inventory.get_slot(0)
+	assert_eq(slot.item, 1, "Same-index move should not change item")
+	assert_eq(slot.count, 10, "Same-index move should not change count")
+	assert_signal_not_emitted(inventory, "inventory_updated", "Same-index move should not emit signal")
+
+
+func test_move_slot_invalid_index_does_nothing():
+	var inventory = Inventory.new()
+	inventory.add_item(1, 10)
+	inventory.move_slot(-1, 0)
+	inventory.move_slot(0, 100)
+	var slot = inventory.get_slot(0)
+	assert_eq(slot.item, 1, "Invalid move should not change slot")
+	assert_eq(slot.count, 10, "Invalid move should not change count")
+
+
+func test_move_slot_emits_signal():
+	var inventory = Inventory.new()
+	inventory.add_item(1, 10)
+	watch_signals(inventory)
+	inventory.move_slot(0, 5)
+	assert_signal_emitted(inventory, "inventory_updated", "move_slot should emit inventory_updated signal")

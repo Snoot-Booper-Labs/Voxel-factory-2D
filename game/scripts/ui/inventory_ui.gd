@@ -4,6 +4,7 @@ extends Control
 ## Full inventory grid panel
 ##
 ## Displays all inventory slots in a grid. Opens/closes with toggle.
+## Supports click-to-select and shift-click-to-move items between slots.
 
 signal slot_clicked(slot_index: int)
 
@@ -11,11 +12,16 @@ const COLUMNS: int = 9
 const SLOT_SIZE: int = 48
 const SLOT_MARGIN: int = 4
 
+const COLOR_NORMAL := Color(1, 1, 1)
+const COLOR_SELECTED := Color(1.2, 1.2, 0.8)
+const COLOR_HOVER := Color(1.1, 1.1, 1.1)
+
 var inventory: Inventory
 var _slot_panels: Array[Panel] = []
 var _slot_labels: Array[Label] = []
 var _name_labels: Array[Label] = []
 var _is_open: bool = false
+var _selected_slot: int = -1
 
 
 func _ready() -> void:
@@ -63,8 +69,16 @@ func _create_grid() -> void:
 	for i in range(slot_count):
 		var panel = Panel.new()
 		panel.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
+		panel.mouse_filter = Control.MOUSE_FILTER_STOP
+		panel.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		grid.add_child(panel)
 		_slot_panels.append(panel)
+
+		# Connect mouse input for click-to-select
+		var slot_index = i
+		panel.gui_input.connect(_on_slot_gui_input.bind(slot_index))
+		panel.mouse_entered.connect(_on_slot_mouse_entered.bind(slot_index))
+		panel.mouse_exited.connect(_on_slot_mouse_exited.bind(slot_index))
 
 		# Add label for name
 		var name_label = Label.new()
@@ -73,6 +87,7 @@ func _create_grid() -> void:
 		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		name_label.anchors_preset = Control.PRESET_FULL_RECT
 		name_label.add_theme_font_size_override("font_size", 10)
+		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(name_label)
 		_name_labels.append(name_label)
 
@@ -81,6 +96,7 @@ func _create_grid() -> void:
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 		label.anchors_preset = Control.PRESET_FULL_RECT
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(label)
 		_slot_labels.append(label)
 
@@ -92,22 +108,14 @@ func _create_grid() -> void:
 	background.custom_minimum_size = Vector2(grid_width + padding * 2, grid_height + padding * 2)
 	grid.position = Vector2(padding, padding)
 
-	# Center on screen - depreciated for lower position
-	#anchor_left = 0.5
-	#anchor_right = 0.5
-	#anchor_top = 0.5
-	#anchor_bottom = 0.5
-	#offset_left = - (grid_width + padding * 2) / 2
-	#offset_right = (grid_width + padding * 2) / 2
-	#offset_top = - (grid_height + padding * 2) / 2
-	#offset_bottom = (grid_height + padding * 2) / 2
-
 
 func toggle() -> void:
 	_is_open = not _is_open
 	visible = _is_open
 	if _is_open:
 		_refresh_all_slots()
+	else:
+		deselect()
 
 
 func open() -> void:
@@ -119,10 +127,82 @@ func open() -> void:
 func close() -> void:
 	_is_open = false
 	visible = false
+	deselect()
 
 
 func is_open() -> bool:
 	return _is_open
+
+
+## Returns the currently selected slot index, or -1 if none selected
+func get_selected_slot() -> int:
+	return _selected_slot
+
+
+## Select a specific slot by index
+func select_slot(index: int) -> void:
+	if index < 0 or index >= _slot_panels.size():
+		return
+	_selected_slot = index
+	_update_selection_visual()
+	slot_clicked.emit(index)
+
+
+## Deselect the currently selected slot
+func deselect() -> void:
+	_selected_slot = -1
+	_update_selection_visual()
+
+
+## Handle a click on a slot. If shift is held and a slot is already selected,
+## moves the item from the selected slot to the clicked slot.
+## Otherwise, selects the clicked slot (or deselects if clicking the same slot).
+func handle_slot_click(slot_index: int, shift_held: bool) -> void:
+	if inventory == null:
+		return
+
+	if shift_held and _selected_slot >= 0 and _selected_slot != slot_index:
+		# Move/stack items from selected slot to clicked slot
+		inventory.move_slot(_selected_slot, slot_index)
+		deselect()
+	elif _selected_slot == slot_index:
+		# Clicking same slot deselects
+		deselect()
+	else:
+		# Select the clicked slot
+		select_slot(slot_index)
+
+
+func _on_slot_gui_input(event: InputEvent, slot_index: int) -> void:
+	if Engine.is_editor_hint():
+		return
+
+	if event is InputEventMouseButton:
+		var mb = event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			handle_slot_click(slot_index, mb.shift_pressed)
+
+
+func _on_slot_mouse_entered(slot_index: int) -> void:
+	if Engine.is_editor_hint():
+		return
+	if slot_index != _selected_slot:
+		_slot_panels[slot_index].modulate = COLOR_HOVER
+
+
+func _on_slot_mouse_exited(slot_index: int) -> void:
+	if Engine.is_editor_hint():
+		return
+	if slot_index != _selected_slot:
+		_slot_panels[slot_index].modulate = COLOR_NORMAL
+
+
+func _update_selection_visual() -> void:
+	for i in range(_slot_panels.size()):
+		if i == _selected_slot:
+			_slot_panels[i].modulate = COLOR_SELECTED
+		else:
+			_slot_panels[i].modulate = COLOR_NORMAL
 
 
 func _on_inventory_updated() -> void:
