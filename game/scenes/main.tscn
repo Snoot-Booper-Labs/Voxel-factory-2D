@@ -77,7 +77,7 @@ texture = ExtResource("3_3v7cf")
 centered = false
 
 [node name="BGParallax_TreesFar" type="Parallax2D" parent="BGParallax" unique_id=15364839]
-scroll_scale = Vector2(0.4, 0.5)
+scroll_scale = Vector2(0.3, 0.5)
 
 [node name="Sprite2D" type="Sprite2D" parent="BGParallax/BGParallax_TreesFar" unique_id=364117008]
 editor_description = "Parallax Texture: Trees Far"
@@ -85,7 +85,7 @@ texture = ExtResource("4_r75lq")
 centered = false
 
 [node name="BGParallax_TreesNear" type="Parallax2D" parent="BGParallax" unique_id=1822488643]
-scroll_scale = Vector2(0.6, 0.5)
+scroll_scale = Vector2(0.4, 0.5)
 
 [node name="Sprite2D" type="Sprite2D" parent="BGParallax/BGParallax_TreesNear" unique_id=1450752586]
 editor_description = "Parallax Texture: Trees Near"
@@ -93,7 +93,7 @@ texture = ExtResource("5_cxktm")
 centered = false
 
 [node name="BGParallax_Ground" type="Parallax2D" parent="BGParallax" unique_id=706126098]
-scroll_scale = Vector2(0.6, 0.5)
+scroll_scale = Vector2(0.5, 0.5)
 
 [node name="Sprite2D" type="Sprite2D" parent="BGParallax/BGParallax_Ground" unique_id=909433852]
 editor_description = "Parallax Texture: Ground"
