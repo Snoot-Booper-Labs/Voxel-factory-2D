@@ -169,3 +169,25 @@ func _complete_mining(block_type: int) -> void:
 ## Returns the Inventory component
 func get_inventory() -> Inventory:
 	return get_component("Inventory") as Inventory
+
+
+## Serialize miner state to a dictionary
+func serialize() -> Dictionary:
+	return {
+		"type": "Miner",
+		"position": {"x": position.x, "y": position.y},
+		"direction": {"x": direction.x, "y": direction.y},
+		"state": _state,
+		"inventory": get_inventory().serialize(),
+	}
+
+
+## Restore miner state from a dictionary.
+## Call after setup() so position/direction are overwritten with saved values.
+func deserialize(data: Dictionary) -> void:
+	var state_val: int = int(data.get("state", State.IDLE))
+	_state = state_val as State
+
+	var inv_data: Array = data.get("inventory", [])
+	if inv_data.size() > 0:
+		get_inventory().deserialize(inv_data)

@@ -379,33 +379,33 @@ func test_set_tracking_target_updates_chunks():
 
 
 func test_moving_target_loads_new_chunks():
-	# moving target should load new chunks and unload old ones
+	# Changing visible bounds should load new chunks and unload old ones
+	# Note: WorldRenderer now uses viewport transform, not a tracking target.
+	# We test the underlying _update_chunks() directly with different bounds.
 	var renderer = _create_test_renderer()
 	var tile_world = TileWorld.new(12345)
 	renderer.set_tile_world(tile_world)
 
-	var target = Node2D.new()
-	target.global_position = Vector2.ZERO
-	renderer.set_tracking_target(target)
-	renderer._process(0.1)
+	# Simulate initial view centered near origin
+	var initial_bounds = Rect2i(Vector2i(-2, -2), Vector2i(5, 5))
+	renderer._update_chunks(initial_bounds)
 
-	# Move target far away (e.g. 20 chunks away)
-	# Chunk size 16 * 16 pixels = 256 pixels
-	# Move 20 chunks right = 20 * 256 = 5120 pixels
-	target.global_position = Vector2(5120, 0)
+	assert_true(renderer._loaded_chunks.has(Vector2i(0, 0)), "Center chunk should be loaded initially")
+
+	# Simulate moving the view far away (20 chunks to the right)
+	var new_bounds = Rect2i(Vector2i(18, -2), Vector2i(5, 5))
 
 	watch_signals(renderer)
-	renderer._process(0.1)
+	renderer._update_chunks(new_bounds)
 
-	# Should have loaded new chunks
+	# Should have loaded new chunks around the new position
 	var new_center = Vector2i(20, 0)
 	assert_true(renderer._loaded_chunks.has(new_center), "New center chunk should be loaded")
 
-	# Should have unloaded old chunks (0, 0)
+	# Should have unloaded old chunks that are no longer in range
 	assert_signal_emitted(renderer, "chunk_unloaded", "Should emit chunk_unloaded")
 	assert_false(renderer._loaded_chunks.has(Vector2i(0, 0)), "Old center chunk should be unloaded")
 
-	target.free()
 	renderer.queue_free()
 
 

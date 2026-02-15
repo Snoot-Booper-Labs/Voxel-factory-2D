@@ -9,6 +9,9 @@ var inventory_ui: InventoryUI
 var miner_inventory_ui: InventoryUI
 var active_miner_entity: Miner = null
 
+signal save_requested
+signal load_requested
+
 const MAX_INTERACTION_DISTANCE = 64.0
 
 
@@ -34,6 +37,7 @@ func _process(_delta: float) -> void:
 	_handle_actions()
 	_handle_hotbar_selection()
 	_handle_ui()
+	_handle_save_load()
 	_check_miner_distance()
 
 
@@ -151,3 +155,10 @@ func _handle_hotbar_selection() -> void:
 				hotbar_ui.select_slot(i)
 			if placement_controller:
 				placement_controller.set_selected_slot(i)
+
+
+func _handle_save_load() -> void:
+	if Input.is_action_just_pressed("save_game"):
+		save_requested.emit()
+	if Input.is_action_just_pressed("load_game"):
+		load_requested.emit()

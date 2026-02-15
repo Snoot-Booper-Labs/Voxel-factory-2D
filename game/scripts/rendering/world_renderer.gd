@@ -41,6 +41,7 @@ func set_tile_world(world: TileWorld) -> void:
 		tile_world.block_changed.disconnect(_on_block_changed)
 
 	tile_world = world
+	clear()
 	if tile_world != null:
 		tile_world.block_changed.connect(_on_block_changed)
 
