@@ -8,6 +8,7 @@ var hotbar_ui: HotbarUI
 var inventory_ui: InventoryUI
 var miner_inventory_ui: InventoryUI
 var pause_menu: PauseMenuController
+var debug_console: DebugConsoleController
 var active_miner_entity: Miner = null
 
 signal save_requested
@@ -31,12 +32,23 @@ func set_pause_menu(menu: PauseMenuController) -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
+func set_debug_console(console: DebugConsoleController) -> void:
+	debug_console = console
+
+
 func _process(_delta: float) -> void:
-	# Always handle pause menu input, even while paused
+	# Always handle console toggle and pause menu input, even while paused
+	_handle_console_toggle()
 	_handle_pause_menu()
 
 	# Block all game input while paused
 	if get_tree().paused:
+		return
+
+	# Block all game input while console is open
+	if debug_console and debug_console.is_open():
+		if player_controller:
+			player_controller.stop()
 		return
 
 	if player_controller:
@@ -56,6 +68,20 @@ func _process(_delta: float) -> void:
 	_check_miner_distance()
 
 
+func _handle_console_toggle() -> void:
+	if not Input.is_action_just_pressed("toggle_console"):
+		return
+
+	if debug_console == null:
+		return
+
+	# Don't toggle console while pause menu is open
+	if pause_menu and pause_menu.is_open():
+		return
+
+	debug_console.toggle()
+
+
 func _handle_movement() -> void:
 	if player_controller == null:
 		return
@@ -70,6 +96,15 @@ func _handle_movement() -> void:
 		player_controller.set_wants_walk(true)
 	else:
 		player_controller.set_wants_walk(false)
+
+	# Fly mode vertical movement: Space = up, Shift = down
+	if player_controller.is_flying():
+		var vertical := 0.0
+		if Input.is_action_pressed("jump"):
+			vertical += 1.0
+		if Input.is_key_pressed(KEY_SHIFT):
+			vertical -= 1.0
+		player_controller.set_fly_vertical(vertical)
 
 
 func _handle_jump() -> void:
@@ -102,6 +137,11 @@ func _handle_pause_menu() -> void:
 		return
 
 	if pause_menu == null:
+		return
+
+	# Priority 0: If debug console is open, close it first
+	if debug_console and debug_console.is_open():
+		debug_console.close()
 		return
 
 	# Priority 1: If pause menu is open, close it (resume)

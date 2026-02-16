@@ -19,6 +19,9 @@ var save_manager: SaveManager
 @onready var placement_controller: PlacementController = $PlacementController
 @onready var bgparallax_controller: BGParallax = $BGParallax
 @onready var pause_menu: PauseMenuController = $CanvasLayer/PauseMenu
+@onready var debug_console: DebugConsoleController = $CanvasLayer/DebugConsole
+
+var command_registry: CommandRegistry
 
 const WORLD_SEED = 1
 const INITIAL_RENDER_SIZE = 64
@@ -59,6 +62,10 @@ func _ready() -> void:
 	pause_menu.save_requested.connect(_on_pause_save_requested)
 	pause_menu.load_requested.connect(_on_pause_load_requested)
 	pause_menu.set_camera(player.get_node("Camera2D"))
+
+	# Setup debug console
+	_setup_debug_console()
+	input_manager.set_debug_console(debug_console)
 
 	# Setup background parallax (after spawn so camera position is set)
 	bgparallax_controller.setup(player.get_node("Camera2D"))
@@ -161,6 +168,7 @@ func _on_load_requested() -> void:
 		EntitySaver.deserialize_all(entities_data, self, tile_world)
 
 	_update_save_manager_refs()
+	_update_debug_context()
 	print("[Main] Game loaded successfully")
 
 
@@ -170,6 +178,46 @@ func _update_save_manager_refs() -> void:
 	save_manager.player_node = player
 	save_manager.scene_tree = get_tree()
 	save_manager.entity_parent = self
+
+
+## Setup the debug console with command registry and built-in commands
+func _setup_debug_console() -> void:
+	command_registry = CommandRegistry.new()
+
+	# Register all built-in commands
+	command_registry.register(HelpCommand.new())
+	command_registry.register(ClearCommand.new())
+	command_registry.register(GiveCommand.new())
+	command_registry.register(FlyCommand.new())
+	command_registry.register(NoclipCommand.new())
+	command_registry.register(TeleportCommand.new())
+	command_registry.register(SpawnCommand.new())
+	command_registry.register(SeedCommand.new())
+	command_registry.register(DimensionCommand.new())
+	command_registry.register(GodCommand.new())
+	command_registry.register(SetTimeCommand.new())
+
+	# Setup console with registry and context
+	debug_console.setup(command_registry, _build_debug_context())
+
+
+## Build the context dictionary passed to every command execution
+func _build_debug_context() -> Dictionary:
+	return {
+		"player": player,
+		"inventory": inventory,
+		"world": tile_world,
+		"scene_tree": get_tree(),
+		"entity_parent": self,
+		"registry": command_registry,
+		"console": debug_console,
+	}
+
+
+## Update the debug console context after game state changes (e.g. load)
+func _update_debug_context() -> void:
+	if debug_console:
+		debug_console.set_context(_build_debug_context())
 
 
 func _remove_all_miners() -> void:
