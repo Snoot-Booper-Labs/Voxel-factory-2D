@@ -158,13 +158,26 @@ func _complete_mining(block_type: int) -> void:
 	if drops.item != "" and drops.count > 0:
 		var item_type = ItemData.get_type_from_name(drops.item)
 		if item_type != ItemData.ItemType.NONE:
-			get_inventory().add_item(item_type, drops.count)
+			var remaining := get_inventory().add_item(item_type, drops.count)
+			# If inventory is full, spawn item entity in the world
+			if remaining > 0:
+				_spawn_item_drop(item_type, remaining)
 
 	# Remove block
 	tile_world.set_block(_current_mining_block_pos.x, _current_mining_block_pos.y, BlockData.BlockType.AIR)
 
 	# Resume moving
 	_state = State.MOVING
+
+
+## Spawn a dropped item entity behind the miner (opposite of mining direction)
+func _spawn_item_drop(item_type: int, item_count: int) -> void:
+	if not is_inside_tree():
+		return
+	# Drop behind the miner (opposite direction from where it's mining)
+	var drop_offset := Vector2(-direction.x * WorldUtils.TILE_SIZE, 0)
+	var drop_pos := position + drop_offset
+	ItemEntity.spawn(get_parent(), item_type, item_count, drop_pos)
 
 ## Returns the Inventory component
 func get_inventory() -> Inventory:

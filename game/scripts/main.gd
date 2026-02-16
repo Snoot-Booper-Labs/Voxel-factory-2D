@@ -136,8 +136,9 @@ func _on_pause_load_requested() -> void:
 
 
 func _on_load_requested() -> void:
-	# Remove existing miners before loading
+	# Remove existing miners and item entities before loading
 	_remove_all_miners()
+	_remove_all_item_entities()
 
 	var data := save_manager.load_game()
 	if data.is_empty():
@@ -224,6 +225,12 @@ func _remove_all_miners() -> void:
 	for miner in get_tree().get_nodes_in_group("miners"):
 		if is_instance_valid(miner):
 			miner.queue_free()
+
+
+func _remove_all_item_entities() -> void:
+	for item in get_tree().get_nodes_in_group("item_entities"):
+		if is_instance_valid(item):
+			item.queue_free()
 
 
 func _spawn_player_above_terrain() -> void:
