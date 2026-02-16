@@ -10,13 +10,16 @@ const PLACEMENT_RANGE: float = 80.0 # 5 tiles * 16 pixels
 
 var tile_world: TileWorld
 var inventory: Inventory
+var belt_system: BeltSystem
 var player_position: Vector2 = Vector2.ZERO
 var selected_slot: int = 0 # Current hotbar slot
 
 
-func setup(world: TileWorld, inv: Inventory) -> void:
+func setup(world: TileWorld, inv: Inventory, p_belt_system: BeltSystem = null) -> void:
 	tile_world = world
 	inventory = inv
+	if p_belt_system:
+		belt_system = p_belt_system
 
 
 func set_player_position(pos: Vector2) -> void:
@@ -72,52 +75,67 @@ func try_place_at(world_position: Vector2) -> bool:
 
 func _try_place_entity(item_type: int, world_pos: Vector2) -> bool:
 	if item_type == ItemData.ItemType.MINER:
-		var tile_pos = WorldUtils.world_to_tile(world_pos)
+		return _try_place_miner(world_pos)
+	elif item_type == ItemData.ItemType.CONVEYOR:
+		return _try_place_conveyor(world_pos)
+	return false
 
-		# Check if space is clear (2 blocks wide) -> Wait, entities can overlap blocks?
-		# Prompt says "placed down should mine straight left or right".
-		# Assuming it needs space? Or replaces blocks?
-		# "placed down should mine... don't worry about drawing that inventory".
-		# "make it a 2 block wide... with the 'front' being a darker...".
-		# Let's assume it requires empty space to be placed initially.
-		# Check (x,y) and (x+1,y) or just (x,y)?
-		# Let's check the origin tile for now.
-		if tile_world.is_solid(tile_pos.x, tile_pos.y):
-			return false
 
-		# Determine direction based on player relative position
-		# If click is to the right of player, face right. Else left.
-		var direction = Vector2i.RIGHT
-		if world_pos.x < player_position.x:
-			direction = Vector2i.LEFT
+func _try_place_miner(world_pos: Vector2) -> bool:
+	var tile_pos = WorldUtils.world_to_tile(world_pos)
 
-		# Instantiate Miner
-		# Note: We need a better way to get the scene path, but hardcoding for this task
-		var miner_scene = load("res://scenes/entities/miner.tscn")
-		if miner_scene:
-			var miner = miner_scene.instantiate()
-			# Add to Main scene root (owner of placement controller usually Main)
-			# Find main scene
-			var main = get_node("/root/Main") # Might be unsafe if scene name changes
-			# Better: use get_tree().current_scene if it is Main, or owner if setup correctly
-			# For now, let's try adding to parent of this node (Main)
-			get_parent().add_child(miner)
+	# Check if space is clear
+	if tile_world.is_solid(tile_pos.x, tile_pos.y):
+		return false
 
-			# Setup miner
-			# Position: centered on tile? Tiles are 16x16.
-			# Origin is usually top-left of tile in this system?
-			# world_to_tile truncates.
-			# tile * 16 is top-left.
-			# Miner scene visuals are 0,0 to 32,16.
-			# Let's place at tile_pos * 16. Y is inverted.
-			var spawn_pos = WorldUtils.tile_to_world(tile_pos)
+	# Determine direction based on player relative position
+	var direction = Vector2i.RIGHT
+	if world_pos.x < player_position.x:
+		direction = Vector2i.LEFT
 
-			if miner.has_method("setup"):
-				miner.setup(tile_world, spawn_pos, direction)
+	var miner_scene = load("res://scenes/entities/miner.tscn")
+	if miner_scene:
+		var miner = miner_scene.instantiate()
+		get_parent().add_child(miner)
 
-			# Remove item
-			inventory.remove_item(selected_slot, 1)
-			return true
+		var spawn_pos = WorldUtils.tile_to_world(tile_pos)
+		if miner.has_method("setup"):
+			miner.setup(tile_world, spawn_pos, direction, belt_system)
+
+		inventory.remove_item(selected_slot, 1)
+		return true
+
+	return false
+
+
+func _try_place_conveyor(world_pos: Vector2) -> bool:
+	var tile_pos = WorldUtils.world_to_tile(world_pos)
+
+	# Don't place on solid blocks
+	if tile_world.is_solid(tile_pos.x, tile_pos.y):
+		return false
+
+	# Don't place on top of an existing belt
+	if belt_system and belt_system.get_belt_at(tile_pos) != null:
+		return false
+
+	# Determine direction based on player relative position
+	var dir := BeltNode.Direction.RIGHT
+	if world_pos.x < player_position.x:
+		dir = BeltNode.Direction.LEFT
+
+	var conveyor_scene = load("res://scenes/entities/conveyor.tscn")
+	if conveyor_scene:
+		var conveyor: Conveyor = conveyor_scene.instantiate()
+		get_parent().add_child(conveyor)
+		conveyor.setup(tile_pos, dir)
+
+		# Register with belt system
+		if belt_system:
+			belt_system.register_belt(conveyor.get_belt())
+
+		inventory.remove_item(selected_slot, 1)
+		return true
 
 	return false
 

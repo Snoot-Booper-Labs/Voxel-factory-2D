@@ -661,10 +661,13 @@ func test_full_integration_with_pocket_dimension():
 	overworld.set_block(80, 30, BlockData.BlockType.IRON_ORE)
 	pocket.set_block(80, 30, BlockData.BlockType.DIAMOND_ORE)
 
-	# Create belt system
+	# Create belt system with two belts (MAX_ITEMS=1 per belt)
 	var belt_system := BeltSystem.new()
-	var belt := Conveyor.new(Vector2i(0, 0), BeltNode.Direction.RIGHT)
-	belt_system.register_belt(belt.get_belt())
+	var belt_a := Conveyor.new(Vector2i(0, 0), BeltNode.Direction.RIGHT)
+	var belt_b := Conveyor.new(Vector2i(1, 0), BeltNode.Direction.RIGHT)
+	belt_a.get_belt().connect_to(belt_b.get_belt())
+	belt_system.register_belt(belt_a.get_belt())
+	belt_system.register_belt(belt_b.get_belt())
 
 	# Mine in overworld
 	var miner := Miner.new()
@@ -681,10 +684,15 @@ func test_full_integration_with_pocket_dimension():
 	while miner.tick():
 		pass
 
-	# Transfer to belt
+	# Transfer overworld item to belt_a
 	var slot1 := miner.get_inventory().get_slot(0)
-	belt.add_item(slot1["item"])
+	belt_a.add_item(slot1["item"])
 	miner.get_inventory().remove_item(0, 1)
+
+	# Process so item moves from belt_a to belt_b, freeing belt_a
+	belt_system.process_belts(1.0)
+	assert_true(belt_b.get_belt().has_items(), "Belt B should have overworld item")
+	assert_false(belt_a.get_belt().has_items(), "Belt A should be free after transfer")
 
 	# Switch to pocket dimension
 	dimension_system.set_active_dimension(pocket_id)
@@ -705,30 +713,26 @@ func test_full_integration_with_pocket_dimension():
 	while miner.tick():
 		pass
 
-	# Transfer to belt
+	# Transfer pocket item to belt_a (now empty)
 	var slot2 := miner.get_inventory().get_slot(0)
-	belt.add_item(slot2["item"])
+	belt_a.add_item(slot2["item"])
 	miner.get_inventory().remove_item(0, 1)
 
-	# Belt should have items from both dimensions
-	var belt_items := belt.get_belt().get_items()
-	assert_eq(belt_items.size(), 2, "Belt should have 2 items")
+	# Each belt should have one item from each dimension
+	assert_true(belt_a.get_belt().has_items(), "Belt A should have pocket item")
+	assert_true(belt_b.get_belt().has_items(), "Belt B should have overworld item")
 
-	# Check item types (order may vary)
-	var has_iron := false
-	var has_diamond := false
-	for item in belt_items:
-		if item["item_type"] == ItemData.ItemType.IRON_ORE:
-			has_iron = true
-		elif item["item_type"] == ItemData.ItemType.DIAMOND:
-			has_diamond = true
+	var item_a = belt_a.get_belt().get_items()[0]["item_type"]
+	var item_b = belt_b.get_belt().get_items()[0]["item_type"]
 
-	assert_true(has_iron, "Belt should have iron ore from overworld")
-	assert_true(has_diamond, "Belt should have diamond from pocket dimension")
+	# belt_b got the overworld item (iron ore), belt_a has the pocket item (diamond)
+	assert_eq(item_b, ItemData.ItemType.IRON_ORE, "Belt B should have iron ore from overworld")
+	assert_eq(item_a, ItemData.ItemType.DIAMOND, "Belt A should have diamond from pocket dimension")
 
 	# Cleanup
 	miner.free()
-	belt.free()
+	belt_a.free()
+	belt_b.free()
 	belt_system.free()
 	dimension_system.free()
 

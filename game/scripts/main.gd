@@ -8,12 +8,13 @@ extends Node2D
 var tile_world: TileWorld
 var inventory: Inventory
 var save_manager: SaveManager
+var belt_system: BeltSystem
 
 @onready var world_renderer: WorldRenderer = $WorldRenderer
 @onready var player: PlayerController = $Player
 @onready var hotbar_ui: HotbarUI = $CanvasLayer/HotbarUI
 @onready var inventory_ui: InventoryUI = $CanvasLayer/InventoryUI
-@onready var miner_inventory_ui: InventoryUI = $CanvasLayer/MinerInventoryUI
+@onready var miner_inventory_ui: MinerInventoryUI = $CanvasLayer/MinerInventoryUI
 @onready var input_manager: InputManager = $InputManager
 @onready var mining_controller: MiningController = $MiningController
 @onready var placement_controller: PlacementController = $PlacementController
@@ -34,6 +35,12 @@ func _ready() -> void:
 	save_manager.name = "SaveManager"
 	add_child(save_manager)
 
+	# Create belt system
+	belt_system = BeltSystem.new()
+	belt_system.name = "BeltSystem"
+	belt_system.item_drop_parent = self
+	add_child(belt_system)
+
 	# Try loading a save, otherwise start fresh
 	if save_manager.has_save():
 		_load_game()
@@ -46,7 +53,7 @@ func _ready() -> void:
 
 	# Setup controllers
 	mining_controller.setup(tile_world, inventory)
-	placement_controller.setup(tile_world, inventory)
+	placement_controller.setup(tile_world, inventory, belt_system)
 
 	# Setup UI
 	hotbar_ui.setup(inventory)
@@ -110,7 +117,7 @@ func _load_game() -> void:
 	# Restore entities (deferred to ensure scene tree is ready)
 	var entities_data: Array = data.get("entities", [])
 	if entities_data.size() > 0:
-		EntitySaver.deserialize_all(entities_data, self, tile_world)
+		EntitySaver.deserialize_all(entities_data, self, tile_world, belt_system)
 
 
 func _on_save_requested() -> void:
@@ -136,8 +143,9 @@ func _on_pause_load_requested() -> void:
 
 
 func _on_load_requested() -> void:
-	# Remove existing miners and item entities before loading
+	# Remove existing miners, conveyors, and item entities before loading
 	_remove_all_miners()
+	_remove_all_conveyors()
 	_remove_all_item_entities()
 
 	var data := save_manager.load_game()
@@ -152,7 +160,7 @@ func _on_load_requested() -> void:
 	# Reconnect world to renderer and controllers
 	world_renderer.set_tile_world(tile_world)
 	mining_controller.setup(tile_world, inventory)
-	placement_controller.setup(tile_world, inventory)
+	placement_controller.setup(tile_world, inventory, belt_system)
 
 	# Restore player
 	var player_data: Dictionary = data.get("player", {})
@@ -166,7 +174,7 @@ func _on_load_requested() -> void:
 	# Restore entities
 	var entities_data: Array = data.get("entities", [])
 	if entities_data.size() > 0:
-		EntitySaver.deserialize_all(entities_data, self, tile_world)
+		EntitySaver.deserialize_all(entities_data, self, tile_world, belt_system)
 
 	_update_save_manager_refs()
 	_update_debug_context()
@@ -227,6 +235,15 @@ func _remove_all_miners() -> void:
 			miner.queue_free()
 
 
+func _remove_all_conveyors() -> void:
+	# Clear belt system registrations
+	if belt_system:
+		belt_system.belts.clear()
+	for conveyor in get_tree().get_nodes_in_group("conveyors"):
+		if is_instance_valid(conveyor):
+			conveyor.queue_free()
+
+
 func _remove_all_item_entities() -> void:
 	for item in get_tree().get_nodes_in_group("item_entities"):
 		if is_instance_valid(item):
@@ -248,7 +265,11 @@ func _find_surface_y(x: int) -> int:
 	return 0
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	# Update controller positions
 	mining_controller.set_player_position(player.global_position)
 	placement_controller.set_player_position(player.global_position)
+
+	# Process belt system
+	if belt_system:
+		belt_system.process_belts(delta)
