@@ -13,6 +13,10 @@ static func serialize_all(tree: SceneTree) -> Array:
 	for miner in tree.get_nodes_in_group("miners"):
 		if miner is Miner and is_instance_valid(miner):
 			entities.append(miner.serialize())
+	# Serialize item entities (only ground items, not belt items)
+	for item in tree.get_nodes_in_group("item_entities"):
+		if item is ItemEntity and is_instance_valid(item) and not item.on_belt:
+			entities.append(item.serialize())
 	return entities
 
 
@@ -27,6 +31,10 @@ static func deserialize_all(entities_data: Array, parent: Node, tile_world: Tile
 				var miner := _instantiate_miner(entity_data, parent, tile_world)
 				if miner:
 					result.append(miner)
+			"ItemEntity":
+				var item := _instantiate_item_entity(entity_data, parent)
+				if item:
+					result.append(item)
 	return result
 
 
@@ -55,3 +63,16 @@ static func _instantiate_miner(data: Dictionary, parent: Node, tile_world: TileW
 	miner.deserialize(data)
 
 	return miner
+
+
+## Instantiate an item entity from saved data, add to scene, and restore state.
+static func _instantiate_item_entity(data: Dictionary, parent: Node) -> ItemEntity:
+	var item_scene := load("res://scenes/entities/item_entity.tscn")
+	if item_scene == null:
+		return null
+
+	var item: ItemEntity = item_scene.instantiate()
+	parent.add_child(item)
+	item.deserialize(data)
+
+	return item

@@ -65,11 +65,17 @@ func try_mine_at(world_position: Vector2) -> bool:
 	# Remove block (set to air)
 	tile_world.set_block(tile_pos.x, tile_pos.y, BlockData.BlockType.AIR)
 
-	# Add drops to inventory
+	# Add drops to inventory (overflow spawns as item entity)
 	if drops.has("item") and drops.item != "":
 		var item_type = _get_item_type_from_name(drops.item)
 		if item_type != ItemData.ItemType.NONE:
-			inventory.add_item(item_type, drops.count)
+			var remaining := inventory.add_item(item_type, drops.count)
+			if remaining > 0:
+				# Spawn overflow as item entity at the mined block position
+				var drop_pos := WorldUtils.tile_to_world(tile_pos) + Vector2(WorldUtils.TILE_SIZE / 2.0, WorldUtils.TILE_SIZE / 2.0)
+				var parent := get_parent()
+				if parent:
+					ItemEntity.spawn(parent, item_type, remaining, drop_pos)
 
 	block_mined.emit(tile_pos, block_type)
 	return true
