@@ -9,27 +9,37 @@ enum State {IDLE, MOVING, MINING}
 
 var direction: Vector2i = Vector2i.RIGHT
 var tile_world: TileWorld
+var belt_system: BeltSystem
+## When true, the miner places a conveyor belt on each tile it vacates.
+## Belts face opposite to the miner's direction so items flow back.
+var leaves_belt: bool = false
 var _state: State = State.IDLE
 var _target_pos: Vector2
 var _mine_progress: float = 0.0
 var _current_mining_block_pos: Vector2i
+## Tile the miner currently occupies (updated on arrival, used to place belt on departure)
+var _current_tile: Vector2i
 
 func _ready() -> void:
 	add_to_group("miners")
 
 
+const MINER_INVENTORY_SIZE: int = 18
+
 func _init() -> void:
-	# Add required components
-	add_component(Inventory.new())
+	# Add required components — miner has 18 inventory slots (2 rows of 9)
+	add_component(Inventory.new(MINER_INVENTORY_SIZE))
 	# Program component kept for future use, but not processed in this simple version
 	add_component(Program.new())
 
 
-func setup(world: TileWorld, start_pos: Vector2, start_dir: Vector2i) -> void:
+func setup(world: TileWorld, start_pos: Vector2, start_dir: Vector2i, p_belt_system: BeltSystem = null) -> void:
 	tile_world = world
+	belt_system = p_belt_system
 	position = start_pos
 	direction = start_dir
 	_target_pos = position
+	_current_tile = WorldUtils.world_to_tile(position)
 	scale.x = 1.0 if direction == Vector2i.RIGHT else -1.0
 	rotation = 0.0
 	_state = State.MOVING
@@ -90,27 +100,13 @@ func _process_moving(delta: float) -> void:
 
 		# Determine next tile
 		var tile_pos = WorldUtils.world_to_tile(position)
-		var next_tile_pos = tile_pos + direction
-		# Visuals are 2 tiles wide, so the "front" is actually position + direction * 2?
-		# Actually, if the miner is 2 blocks wide (0,0 and 1,0 relative), and moves right:
-		# Front is at (1,0) local. Next block to mine is (2,0) local.
-		# If moving left, Front is at (-1,0)?
-		# Let's assume origin (0,0) is rear, (1,0) is front.
-		# So mining check should be at pos + direction * 2?
-		# Or if it occupies (0,0) and (1,0), it mines (2,0).
 
-		# Let's simplify: Miner occupies current tile and the one behind it?
-		# Scene: Body (0,0), Head (16,0). Total width 32.
-		# Center/Output position is (0,0). Head is forward.
-		# So if at tile (x,y), Head is at (x+1, y). Block to mine is at (x+2, y).
+		# If we arrived at a new tile, place a belt on the tile we just left
+		if tile_pos != _current_tile and leaves_belt:
+			_place_belt_behind(_current_tile)
+		_current_tile = tile_pos
 
 		var mine_target = tile_pos + (direction * 2)
-		if direction == Vector2i.LEFT:
-			# If facing left, and origin is rear (rightmost), head is left (-16, 0)?
-			# Visuals rotation handles this. Origin is pivotal.
-			# If rotated 180 (PI), (16,0) becomes (-16, 0).
-			# So head is at (-1,0) relative to origin. Mine target is (-2,0) relative?
-			pass
 
 		# Check for block at mine_target
 		if tile_world.is_solid(mine_target.x, mine_target.y):
@@ -153,15 +149,24 @@ func _process_mining(delta: float) -> void:
 
 
 func _complete_mining(block_type: int) -> void:
-	# Add to inventory
+	# Get drops for this block type
 	var drops = BlockData.get_block_drops(block_type)
 	if drops.item != "" and drops.count > 0:
 		var item_type = ItemData.get_type_from_name(drops.item)
 		if item_type != ItemData.ItemType.NONE:
-			var remaining := get_inventory().add_item(item_type, drops.count)
-			# If inventory is full, spawn item entity in the world
+			var remaining: int = drops.count
+
+			# Try belt first: push items onto the belt behind the miner
+			if belt_system:
+				remaining = _push_items_to_belt(item_type, remaining)
+
+			# Remaining items go to miner inventory
 			if remaining > 0:
-				_spawn_item_drop(item_type, remaining)
+				remaining = get_inventory().add_item(item_type, remaining)
+
+			# If inventory is also full, drop as world entity
+			if remaining > 0:
+				_drop_item_entity(item_type, remaining)
 
 	# Remove block
 	tile_world.set_block(_current_mining_block_pos.x, _current_mining_block_pos.y, BlockData.BlockType.AIR)
@@ -170,11 +175,62 @@ func _complete_mining(block_type: int) -> void:
 	_state = State.MOVING
 
 
-## Spawn a dropped item entity behind the miner (opposite of mining direction)
-func _spawn_item_drop(item_type: int, item_count: int) -> void:
+## Push items onto the conveyor belt behind the miner.
+## Returns the number of items that could NOT be placed (belt full or missing).
+func _push_items_to_belt(item_type: int, item_count: int) -> int:
+	var miner_tile := WorldUtils.world_to_tile(position)
+	var behind_tile := miner_tile - direction
+	var belt := belt_system.get_belt_at(behind_tile)
+	if belt == null:
+		return item_count
+
+	var remaining := item_count
+	for i in range(item_count):
+		if belt.is_full():
+			break
+		belt.add_item(item_type)
+		remaining -= 1
+	return remaining
+
+
+## Place a conveyor belt on the given tile, facing opposite to the miner's direction.
+## The belt is added to the scene tree and registered with the belt system.
+func _place_belt_behind(tile_pos: Vector2i) -> void:
+	if belt_system == null or not is_inside_tree():
+		return
+
+	# Don't place on top of an existing belt
+	if belt_system.get_belt_at(tile_pos) != null:
+		return
+
+	# Don't place on solid blocks
+	if tile_world and tile_world.is_solid(tile_pos.x, tile_pos.y):
+		return
+
+	# Belt direction is opposite to miner direction (items flow back)
+	var belt_dir: BeltNode.Direction
+	match direction:
+		Vector2i.RIGHT:
+			belt_dir = BeltNode.Direction.LEFT
+		Vector2i.LEFT:
+			belt_dir = BeltNode.Direction.RIGHT
+		_:
+			belt_dir = BeltNode.Direction.LEFT
+
+	var conveyor_scene = load("res://scenes/entities/conveyor.tscn")
+	if conveyor_scene == null:
+		return
+
+	var conveyor: Conveyor = conveyor_scene.instantiate()
+	get_parent().add_child(conveyor)
+	conveyor.setup(tile_pos, belt_dir)
+	belt_system.register_belt(conveyor.get_belt())
+
+
+## Actually spawn a physical ItemEntity in the world
+func _drop_item_entity(item_type: int, item_count: int) -> void:
 	if not is_inside_tree():
 		return
-	# Drop behind the miner (opposite direction from where it's mining)
 	var drop_offset := Vector2(-direction.x * WorldUtils.TILE_SIZE, 0)
 	var drop_pos := position + drop_offset
 	ItemEntity.spawn(get_parent(), item_type, item_count, drop_pos)
@@ -191,6 +247,7 @@ func serialize() -> Dictionary:
 		"position": {"x": position.x, "y": position.y},
 		"direction": {"x": direction.x, "y": direction.y},
 		"state": _state,
+		"leaves_belt": leaves_belt,
 		"inventory": get_inventory().serialize(),
 	}
 
@@ -200,6 +257,7 @@ func serialize() -> Dictionary:
 func deserialize(data: Dictionary) -> void:
 	var state_val: int = int(data.get("state", State.IDLE))
 	_state = state_val as State
+	leaves_belt = data.get("leaves_belt", false)
 
 	var inv_data: Array = data.get("inventory", [])
 	if inv_data.size() > 0:

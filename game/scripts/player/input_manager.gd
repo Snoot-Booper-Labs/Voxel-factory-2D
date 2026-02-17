@@ -6,7 +6,7 @@ var mining_controller: MiningController
 var placement_controller: PlacementController
 var hotbar_ui: HotbarUI
 var inventory_ui: InventoryUI
-var miner_inventory_ui: InventoryUI
+var miner_inventory_ui: MinerInventoryUI
 var pause_menu: PauseMenuController
 var debug_console: DebugConsoleController
 var active_miner_entity: Miner = null
@@ -17,7 +17,7 @@ signal load_requested
 const MAX_INTERACTION_DISTANCE = 64.0
 
 
-func setup(player: PlayerController, mining: MiningController, placement: PlacementController, hotbar: HotbarUI, inv_ui: InventoryUI, miner_inv_ui: InventoryUI) -> void:
+func setup(player: PlayerController, mining: MiningController, placement: PlacementController, hotbar: HotbarUI, inv_ui: InventoryUI, miner_inv_ui: MinerInventoryUI) -> void:
 	player_controller = player
 	mining_controller = mining
 	placement_controller = placement
@@ -209,7 +209,7 @@ func _handle_interaction() -> void:
 
 	if nearest_miner:
 		if miner_inventory_ui:
-			miner_inventory_ui.setup(nearest_miner.get_inventory())
+			miner_inventory_ui.setup(nearest_miner)
 			miner_inventory_ui.open()
 			active_miner_entity = nearest_miner
 

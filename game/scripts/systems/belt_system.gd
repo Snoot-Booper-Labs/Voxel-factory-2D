@@ -1,5 +1,6 @@
 ## BeltSystem for processing conveyor belt item transport
 ## Manages all registered belts and handles item movement/transfer.
+## Automatically connects belt neighbors based on direction.
 ## Spawns visual ItemEntity nodes that move along belt segments.
 class_name BeltSystem
 extends System
@@ -18,14 +19,26 @@ func _init() -> void:
 	required_components = ["BeltNode"]
 
 
-## Register a belt node with this system
+## BeltSystem uses its own process_belts() called from Main._physics_process,
+## not the base System._physics_process entity-per-entity loop.
+func _ready() -> void:
+	set_physics_process(false)
+
+
+## Register a belt node with this system and auto-connect neighbors
 func register_belt(belt: BeltNode) -> void:
 	if belt not in belts:
 		belts.append(belt)
+		_auto_connect(belt)
 
 
-## Unregister a belt node from this system
+## Unregister a belt node from this system and clean up connections
 func unregister_belt(belt: BeltNode) -> void:
+	# Disconnect any belts that point to this one
+	for other in belts:
+		if other.next_belt == belt:
+			other.next_belt = null
+	belt.next_belt = null
 	belts.erase(belt)
 
 
@@ -44,7 +57,7 @@ func process_belts(delta: float) -> void:
 		# Queue transfers for items that completed
 		for item in completed:
 			if belt.next_belt:
-				transfers.append({"belt": belt.next_belt, "item_type": item["item_type"]})
+				transfers.append({"source": belt, "dest": belt.next_belt, "item_type": item["item_type"]})
 			else:
 				# Item fell off the end of the belt — spawn as world item
 				var drop_pos := _belt_end_world_pos(belt)
@@ -53,8 +66,13 @@ func process_belts(delta: float) -> void:
 					ItemEntity.spawn(item_drop_parent, item["item_type"], 1, drop_pos)
 
 	# Second pass: apply all transfers
+	# Check add_item return value to handle race conditions where multiple
+	# belts try to feed the same destination in one frame.
 	for transfer in transfers:
-		transfer["belt"].add_item(transfer["item_type"])
+		if not transfer["dest"].add_item(transfer["item_type"]):
+			# Destination rejected the item (full from another transfer this frame).
+			# Re-add item to source belt so it stalls until next tick.
+			transfer["source"].add_item(transfer["item_type"])
 
 
 ## Find a belt at the given grid position
@@ -64,6 +82,42 @@ func get_belt_at(pos: Vector2i) -> BeltNode:
 			return belt
 	return null
 
+
+## Rebuild all auto-connections (e.g. after load)
+func rebuild_connections() -> void:
+	# Clear existing connections
+	for belt in belts:
+		belt.next_belt = null
+	# Re-connect all
+	for belt in belts:
+		_auto_connect(belt)
+
+
+# =========================================================================
+# Auto-connection
+# =========================================================================
+
+## Connect a belt to its downstream neighbor if one exists at the target tile.
+## Also check if any existing belt should connect *to* the new belt.
+func _auto_connect(belt: BeltNode) -> void:
+	# Forward connection: this belt -> neighbor in its direction
+	var target_pos := belt.position + belt.get_direction_vector()
+	var neighbor := get_belt_at(target_pos)
+	if neighbor != null:
+		belt.next_belt = neighbor
+
+	# Reverse scan: any belt whose output tile == this belt's position
+	for other in belts:
+		if other == belt:
+			continue
+		var other_target := other.position + other.get_direction_vector()
+		if other_target == belt.position:
+			other.next_belt = belt
+
+
+# =========================================================================
+# Visual helpers
+# =========================================================================
 
 ## Update visual positions of ItemEntity nodes riding a belt segment.
 ## Items on belts are represented as ItemEntity nodes with `on_belt = true`.
@@ -125,7 +179,7 @@ func _belt_end_world_pos(belt: BeltNode) -> Vector2:
 	return WorldUtils.tile_to_world(belt.position) + dir_vec * float(WorldUtils.TILE_SIZE)
 
 
-## Convert BeltNode.Direction to a Vector2 direction
+## Convert BeltNode.Direction to a Vector2 direction (screen-space)
 func _belt_direction_vector(dir: BeltNode.Direction) -> Vector2:
 	match dir:
 		BeltNode.Direction.RIGHT:

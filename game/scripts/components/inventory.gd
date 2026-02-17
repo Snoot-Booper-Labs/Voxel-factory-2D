@@ -27,7 +27,8 @@ var _slots: Array[Dictionary] = []
 # Lifecycle
 # =============================================================================
 
-func _init() -> void:
+func _init(p_size: int = DEFAULT_SIZE) -> void:
+	size = p_size
 	_initialize_slots()
 
 

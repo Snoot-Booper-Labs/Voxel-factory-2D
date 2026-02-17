@@ -16,6 +16,7 @@ enum ItemType {
 	BEDROCK = 9,
 	# Entities (10-19)
 	MINER = 10,
+	CONVEYOR = 11,
 	# Material items (20-39)
 	COAL = 20,
 	IRON_ORE = 21,
@@ -49,6 +50,7 @@ static var item_properties: Dictionary = {
 	ItemType.PLANKS: {"max_stack": 64, "name": "Planks", "placeable": true, "block": 13}, # BlockData.BlockType.PLANKS
 	# Entity items
 	ItemType.MINER: {"max_stack": 1, "name": "Miner", "placeable": true, "is_entity": true},
+	ItemType.CONVEYOR: {"max_stack": 64, "name": "Conveyor", "placeable": true, "is_entity": true},
 	# Material items
 	ItemType.COAL: {"max_stack": 64, "name": "Coal", "placeable": false},
 	ItemType.IRON_ORE: {"max_stack": 64, "name": "Iron Ore", "placeable": false},

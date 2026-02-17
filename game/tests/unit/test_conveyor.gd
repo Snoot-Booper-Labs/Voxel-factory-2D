@@ -76,11 +76,24 @@ func test_belt_node_add_item():
 	assert_eq(belt.items[0]["progress"], 0.0, "Item should start at progress 0.0")
 
 
-func test_belt_node_add_multiple_items():
+func test_belt_node_add_item_returns_true():
+	var belt = BeltNode.new()
+	var accepted = belt.add_item(ItemData.ItemType.COAL)
+	assert_true(accepted, "add_item should return true when belt has space")
+
+
+func test_belt_node_is_full_after_max_items():
 	var belt = BeltNode.new()
 	belt.add_item(ItemData.ItemType.COAL)
-	belt.add_item(ItemData.ItemType.IRON_ORE)
-	assert_eq(belt.items.size(), 2, "add_item should allow multiple items")
+	assert_true(belt.is_full(), "Belt should be full after reaching MAX_ITEMS")
+
+
+func test_belt_node_rejects_item_when_full():
+	var belt = BeltNode.new()
+	belt.add_item(ItemData.ItemType.COAL)
+	var accepted = belt.add_item(ItemData.ItemType.IRON_ORE)
+	assert_false(accepted, "add_item should return false when belt is full")
+	assert_eq(belt.items.size(), 1, "Belt should still have only MAX_ITEMS items")
 
 
 func test_belt_node_has_items_false_when_empty():
@@ -124,19 +137,107 @@ func test_belt_node_tick_removes_completed_items():
 	assert_false(belt.has_items(), "Completed items should be removed from belt")
 
 
-func test_belt_node_tick_partial_movement():
+func test_belt_node_tick_partial_does_not_complete():
 	var belt = BeltNode.new()
 	belt.add_item(ItemData.ItemType.COAL)
-	belt.add_item(ItemData.ItemType.IRON_ORE)
-	# Move first item halfway
-	belt.items[0]["progress"] = 0.6
-	var completed = belt.tick(0.5)
-	assert_eq(completed.size(), 1, "Only items reaching 1.0 should complete")
-	assert_eq(belt.items.size(), 1, "One item should remain on belt")
+	# Move item partway
+	belt.items[0]["progress"] = 0.4
+	var completed = belt.tick(0.3)
+	assert_eq(completed.size(), 0, "Item below 1.0 should not complete")
+	assert_eq(belt.items.size(), 1, "Item should remain on belt")
+	assert_almost_eq(belt.items[0]["progress"], 0.7, 0.001, "Progress should accumulate")
 
 
 func test_belt_node_belt_speed_constant():
 	assert_eq(BeltNode.BELT_SPEED, 1.0, "BELT_SPEED should be 1.0")
+
+
+func test_belt_node_max_items_constant():
+	assert_eq(BeltNode.MAX_ITEMS, 1, "MAX_ITEMS should be 1")
+
+
+func test_belt_node_get_direction_vector_right():
+	var belt = BeltNode.new()
+	belt.set_direction(BeltNode.Direction.RIGHT)
+	assert_eq(belt.get_direction_vector(), Vector2i(1, 0), "RIGHT should be (1, 0)")
+
+
+func test_belt_node_get_direction_vector_left():
+	var belt = BeltNode.new()
+	belt.set_direction(BeltNode.Direction.LEFT)
+	assert_eq(belt.get_direction_vector(), Vector2i(-1, 0), "LEFT should be (-1, 0)")
+
+
+func test_belt_node_get_direction_vector_up():
+	var belt = BeltNode.new()
+	belt.set_direction(BeltNode.Direction.UP)
+	assert_eq(belt.get_direction_vector(), Vector2i(0, 1), "UP should be (0, 1) in tile space")
+
+
+func test_belt_node_get_direction_vector_down():
+	var belt = BeltNode.new()
+	belt.set_direction(BeltNode.Direction.DOWN)
+	assert_eq(belt.get_direction_vector(), Vector2i(0, -1), "DOWN should be (0, -1) in tile space")
+
+
+func test_belt_node_backpressure_stalls_item():
+	# When next belt is full, item stalls at progress 1.0
+	var belt_a = BeltNode.new()
+	var belt_b = BeltNode.new()
+	belt_a.connect_to(belt_b)
+	belt_b.add_item(ItemData.ItemType.IRON_ORE)  # Fill belt_b
+
+	belt_a.add_item(ItemData.ItemType.COAL)
+	var completed = belt_a.tick(1.5)  # Would normally complete
+	assert_eq(completed.size(), 0, "Item should not complete when next belt is full")
+	assert_eq(belt_a.items.size(), 1, "Item should stall on belt_a")
+	assert_eq(belt_a.items[0]["progress"], 1.0, "Item should stall at progress 1.0")
+
+
+func test_belt_node_backpressure_releases_when_next_clears():
+	# After next belt clears, stalled item can transfer
+	var belt_a = BeltNode.new()
+	var belt_b = BeltNode.new()
+	belt_a.connect_to(belt_b)
+	belt_b.add_item(ItemData.ItemType.IRON_ORE)
+
+	belt_a.add_item(ItemData.ItemType.COAL)
+	belt_a.tick(1.5)  # Stall
+	assert_eq(belt_a.items.size(), 1, "Should stall initially")
+
+	# Clear belt_b
+	belt_b.items.clear()
+	var completed = belt_a.tick(0.0)  # Zero delta, but item is already >= 1.0
+	assert_eq(completed.size(), 1, "Item should complete after next belt clears")
+
+
+func test_belt_node_serialize():
+	var belt = BeltNode.new()
+	belt.set_position(Vector2i(3, 7))
+	belt.set_direction(BeltNode.Direction.LEFT)
+	belt.add_item(ItemData.ItemType.COAL)
+	belt.items[0]["progress"] = 0.5
+
+	var data = belt.serialize()
+	assert_eq(data["position"]["x"], 3, "Serialized position x should match")
+	assert_eq(data["position"]["y"], 7, "Serialized position y should match")
+	assert_eq(data["direction"], BeltNode.Direction.LEFT, "Serialized direction should match")
+	assert_eq(data["items"].size(), 1, "Serialized items should have 1 item")
+	assert_eq(data["items"][0]["item_type"], ItemData.ItemType.COAL, "Serialized item type should match")
+
+
+func test_belt_node_deserialize():
+	var belt = BeltNode.new()
+	var data = {
+		"position": {"x": 5, "y": 2},
+		"direction": BeltNode.Direction.UP,
+		"items": [{"item_type": ItemData.ItemType.IRON_ORE, "progress": 0.3}],
+	}
+	belt.deserialize(data)
+	assert_eq(belt.position, Vector2i(5, 2), "Deserialized position should match")
+	assert_eq(belt.direction, BeltNode.Direction.UP, "Deserialized direction should match")
+	assert_eq(belt.items.size(), 1, "Deserialized items should have 1 item")
+	assert_eq(belt.items[0]["item_type"], ItemData.ItemType.IRON_ORE, "Deserialized item type should match")
 
 
 # =============================================================================

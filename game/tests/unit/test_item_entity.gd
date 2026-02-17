@@ -1,6 +1,17 @@
 extends GutTest
 ## Unit tests for ItemEntity - visual items that exist in the game world
 
+
+# Clean up all item entities between tests to prevent cross-test contamination.
+# queue_free() is deferred, so leftover entities from prior tests can pollute
+# group queries (get_nodes_in_group("item_entities")) used by _try_merge_nearby()
+# and EntitySaver.serialize_all().
+func after_each() -> void:
+	for node in get_tree().get_nodes_in_group("item_entities"):
+		if is_instance_valid(node):
+			node.free()
+
+
 # =============================================================================
 # Basic Existence and Structure
 # =============================================================================
@@ -147,8 +158,8 @@ func test_item_entity_try_pickup_adds_to_inventory():
 	var entity = ItemEntity.new()
 	entity.item_type = ItemData.ItemType.STONE
 	entity.count = 5
-	entity._pickup_ready = true
 	add_child(entity)
+	entity._pickup_ready = true  # Must be set AFTER add_child; _ready() resets it
 
 	var inventory = Inventory.new()
 	var picked = entity.try_pickup(inventory)
@@ -177,8 +188,8 @@ func test_item_entity_try_pickup_partial():
 	var entity = ItemEntity.new()
 	entity.item_type = ItemData.ItemType.DIRT
 	entity.count = 100
-	entity._pickup_ready = true
 	add_child(entity)
+	entity._pickup_ready = true  # Must be set AFTER add_child; _ready() resets it
 
 	# Create a nearly full inventory (1 slot, max 64)
 	var inventory = Inventory.new()
@@ -196,8 +207,8 @@ func test_item_entity_try_pickup_emits_signal():
 	var entity = ItemEntity.new()
 	entity.item_type = ItemData.ItemType.WOOD
 	entity.count = 3
-	entity._pickup_ready = true
 	add_child(entity)
+	entity._pickup_ready = true  # Must be set AFTER add_child; _ready() resets it
 
 	watch_signals(entity)
 	var inventory = Inventory.new()

@@ -14,6 +14,10 @@ signal slot_clicked(slot_index: int)
 const COLUMNS: int = 9
 const SLOT_SIZE: int = 48
 const SLOT_MARGIN: int = 4
+const DEFAULT_SLOT_COUNT: int = 36
+
+## Number of inventory slots to display. Set before _ready() or call rebuild_grid().
+@export var slot_count: int = DEFAULT_SLOT_COUNT
 
 const COLOR_NORMAL := Color(1, 1, 1)
 const COLOR_SELECTED := Color(1.2, 1.2, 0.8)
@@ -71,8 +75,7 @@ func _create_grid() -> void:
 	grid.add_theme_constant_override("v_separation", SLOT_MARGIN)
 	background.add_child(grid)
 
-	# Calculate size for 36 slots (4 rows x 9 columns)
-	var slot_count = 36
+	# Calculate grid dimensions from configurable slot_count
 	var rows = int(ceil(float(slot_count) / COLUMNS))
 
 	for i in range(slot_count):
@@ -275,6 +278,13 @@ func _update_slot(index: int) -> void:
 
 func get_slot_count() -> int:
 	return _slot_labels.size()
+
+
+## Rebuild the grid with the current slot_count. Useful after changing slot_count at runtime.
+func rebuild_grid() -> void:
+	_create_grid()
+	if inventory != null:
+		_refresh_all_slots()
 
 
 func get_slot_text(index: int) -> String:
