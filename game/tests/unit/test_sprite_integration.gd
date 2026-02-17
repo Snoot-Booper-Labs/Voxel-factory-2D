@@ -62,8 +62,10 @@ func test_sprite_db_icon_coverage_matches_item_data():
 
 
 func test_sprite_db_entity_sprites_match_known_entities():
-	assert_true(SpriteDB.ENTITY_SPRITES.has("miner_idle"),
-		"ENTITY_SPRITES should have miner_idle")
+	assert_true(SpriteDB.ENTITY_SPRITES.has("miner_body"),
+		"ENTITY_SPRITES should have miner_body")
+	assert_true(SpriteDB.ENTITY_SPRITES.has("miner_head"),
+		"ENTITY_SPRITES should have miner_head")
 	assert_true(SpriteDB.ENTITY_SPRITES.has("conveyor"),
 		"ENTITY_SPRITES should have conveyor")
 	assert_true(SpriteDB.ENTITY_SPRITES.has("item_entity"),

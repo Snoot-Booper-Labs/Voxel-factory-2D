@@ -22,8 +22,8 @@ const ATLAS_ROWS := 4
 
 ## Entity sprite sheet paths
 const ENTITY_SPRITES := {
-	"miner_idle": "res://resources/sprites/entities/miner_idle.png",
-	"miner_walk": "res://resources/sprites/entities/miner_walk.png",
+	"miner_body": "res://resources/sprites/entities/miner_body.png",
+	"miner_head": "res://resources/sprites/entities/miner_head.png",
 	"conveyor": "res://resources/sprites/entities/conveyor.png",
 	"item_entity": "res://resources/sprites/entities/item_entity.png",
 }
@@ -123,7 +123,7 @@ static func has_icon(item_type: int) -> bool:
 	return _icon_positions.has(item_type)
 
 
-## Load an entity sprite sheet by key (e.g. "miner_idle", "conveyor").
+## Load an entity sprite sheet by key (e.g. "miner_body", "conveyor").
 ## Returns null if file not found (headless safety).
 static func get_entity_sprite(sprite_key: String) -> Texture2D:
 	if not ENTITY_SPRITES.has(sprite_key):

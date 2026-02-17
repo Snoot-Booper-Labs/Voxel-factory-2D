@@ -1,9 +1,20 @@
 ## Miner Entity - A programmable machine that can mine blocks
 ## Has Inventory and Program components for storing items and executing mining programs
+##
+## Visual structure (composited sprite):
+##   Body  — Sprite2D (48×16, static chassis/treads)
+##   Head  — AnimatedSprite2D (16×16 frames, animated by state)
 class_name Miner
 extends Entity
 
 enum State {IDLE, MOVING, MINING}
+
+## Number of tiles the miner body occupies horizontally
+const BODY_TILES: int = 3
+## Frame size for the head sprite sheet
+const HEAD_FRAME_SIZE: int = 16
+## Number of frames per animation in the head sprite sheet
+const HEAD_FRAMES_PER_ANIM: int = 4
 
 @export var data: MinerData
 
@@ -19,6 +30,10 @@ var _mine_progress: float = 0.0
 var _current_mining_block_pos: Vector2i
 ## Tile the miner currently occupies (updated on arrival, used to place belt on departure)
 var _current_tile: Vector2i
+## Reference to the Head AnimatedSprite2D (set in _setup_sprite)
+var _head: AnimatedSprite2D
+## Tracks current animation to avoid redundant play() calls
+var _current_anim: String = ""
 
 func _ready() -> void:
 	add_to_group("miners")
@@ -26,13 +41,56 @@ func _ready() -> void:
 
 
 func _setup_sprite() -> void:
-	## Load miner sprite texture at runtime for headless safety
-	var sprite := get_node_or_null("Visuals/Sprite") as Sprite2D
-	if sprite == null:
+	## Load miner body texture at runtime for headless safety
+	var body := get_node_or_null("Body") as Sprite2D
+	if body:
+		var body_tex: Texture2D = SpriteDB.get_entity_sprite("miner_body")
+		if body_tex:
+			body.texture = body_tex
+
+	## Build SpriteFrames for the head from the miner_head sprite sheet
+	_head = get_node_or_null("Head") as AnimatedSprite2D
+	if _head == null:
 		return
-	var texture: Texture2D = SpriteDB.get_entity_sprite("miner_idle")
-	if texture:
-		sprite.texture = texture
+
+	var head_tex: Texture2D = SpriteDB.get_entity_sprite("miner_head")
+	if head_tex == null:
+		return
+
+	var sprite_frames := SpriteFrames.new()
+	# Remove the default animation if it exists
+	if sprite_frames.has_animation("default"):
+		sprite_frames.remove_animation("default")
+
+	# idle animation — frames 0-3 (x = 0, 16, 32, 48)
+	sprite_frames.add_animation("idle")
+	sprite_frames.set_animation_loop("idle", true)
+	sprite_frames.set_animation_speed("idle", 4.0)
+	for i in range(HEAD_FRAMES_PER_ANIM):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = head_tex
+		atlas.region = Rect2(i * HEAD_FRAME_SIZE, 0, HEAD_FRAME_SIZE, HEAD_FRAME_SIZE)
+		sprite_frames.add_frame("idle", atlas)
+
+	# mining animation — frames 4-7 (x = 64, 80, 96, 112)
+	sprite_frames.add_animation("mining")
+	sprite_frames.set_animation_loop("mining", true)
+	sprite_frames.set_animation_speed("mining", 8.0)
+	for i in range(HEAD_FRAMES_PER_ANIM):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = head_tex
+		atlas.region = Rect2((HEAD_FRAMES_PER_ANIM + i) * HEAD_FRAME_SIZE, 0, HEAD_FRAME_SIZE, HEAD_FRAME_SIZE)
+		sprite_frames.add_frame("mining", atlas)
+
+	_head.sprite_frames = sprite_frames
+	_play_animation("idle")
+
+
+## Play an animation on the head, avoiding redundant calls.
+func _play_animation(anim_name: String) -> void:
+	if _head and _current_anim != anim_name:
+		_current_anim = anim_name
+		_head.play(anim_name)
 
 
 const MINER_INVENTORY_SIZE: int = 18
@@ -98,9 +156,13 @@ func _process(delta: float) -> void:
 
 	match _state:
 		State.MOVING:
+			_play_animation("idle")
 			_process_moving(delta)
 		State.MINING:
+			_play_animation("mining")
 			_process_mining(delta)
+		State.IDLE:
+			_play_animation("idle")
 
 
 func _process_moving(delta: float) -> void:
@@ -117,7 +179,7 @@ func _process_moving(delta: float) -> void:
 			_place_belt_behind(_current_tile)
 		_current_tile = tile_pos
 
-		var mine_target = tile_pos + (direction * 2)
+		var mine_target = tile_pos + (direction * BODY_TILES)
 
 		# Check for block at mine_target
 		if tile_world.is_solid(mine_target.x, mine_target.y):

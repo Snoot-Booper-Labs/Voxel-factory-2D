@@ -367,11 +367,67 @@ const entityDir = join(GAME_DIR, 'resources', 'sprites', 'entities');
 mkdirSync(entityDir, { recursive: true });
 
 const entitySprites = [
-  { name: 'miner_idle.png', frames: 4, w: 16, h: 16, color: rgba(51, 51, 51) },
-  { name: 'miner_walk.png', frames: 4, w: 16, h: 16, color: rgba(60, 60, 60) },
   { name: 'conveyor.png', frames: 4, w: 16, h: 16, color: rgba(89, 89, 102) },
   { name: 'item_entity.png', frames: 1, w: 16, h: 16, color: rgba(128, 128, 128) },
 ];
+
+// 3a. Miner body — 48×16 (3 tiles wide), static dark chassis
+const minerBodyPixels = Buffer.alloc(48 * 16 * 4);
+// Dark metal chassis base
+fillRect(minerBodyPixels, 48, 0, 0, 48, 16, rgba(51, 51, 51));
+// Treads along bottom
+fillRect(minerBodyPixels, 48, 1, 12, 46, 3, rgba(35, 35, 35));
+// Tread detail dots
+for (let x = 3; x < 46; x += 4) {
+  setPixel(minerBodyPixels, 48, x, 13, rgba(70, 70, 70));
+}
+// Body highlight stripe
+fillRect(minerBodyPixels, 48, 2, 3, 44, 2, rgba(70, 70, 70));
+// Drill housing at front (right side)
+fillRect(minerBodyPixels, 48, 38, 2, 8, 10, rgba(80, 80, 80));
+fillRect(minerBodyPixels, 48, 44, 4, 3, 6, rgba(100, 100, 100));
+// Engine block detail at rear
+fillRect(minerBodyPixels, 48, 2, 5, 8, 6, rgba(60, 60, 60));
+addCross(minerBodyPixels, 48, 6, 8, rgba(255, 200, 50));
+const minerBodyPath = join(entityDir, 'miner_body.png');
+writeFileSync(minerBodyPath, createPNG(48, 16, minerBodyPixels));
+console.log(`  ✓ ${minerBodyPath}`);
+
+// 3b. Miner head sprite sheet — 4 frames × 16×16 for idle, 4 frames × 16×16 for mining
+// Layout: 8 frames total in a horizontal strip (128×16)
+// Frames 0-3: idle (subtle bob), Frames 4-7: mining (active movement)
+const headFrames = 8;
+const headW = 16, headH = 16;
+const headPixels = Buffer.alloc(headFrames * headW * headH * 4);
+const headTotalW = headFrames * headW;
+
+for (let f = 0; f < headFrames; f++) {
+  const ox = f * headW;
+  const isMining = f >= 4;
+  const baseHeadColor = isMining ? rgba(60, 60, 70) : rgba(55, 55, 65);
+
+  // Head shape (rounded-ish rectangle)
+  fillRect(headPixels, headTotalW, ox + 2, 2, 12, 12, baseHeadColor);
+  // Visor/eye
+  const eyeY = 5 + (isMining ? (f % 2) : 0); // mining: eye jitters
+  fillRect(headPixels, headTotalW, ox + 4, eyeY, 8, 3, rgba(100, 200, 255));
+  // Antenna
+  const antennaX = ox + 7;
+  const antennaTop = isMining ? 1 : (f % 2 === 0 ? 0 : 1); // idle: slight bob
+  setPixel(headPixels, headTotalW, antennaX, antennaTop, rgba(255, 100, 100));
+  setPixel(headPixels, headTotalW, antennaX, antennaTop + 1, rgba(200, 200, 200));
+  // Mining sparks
+  if (isMining) {
+    const sparkX = ox + 10 + ((f - 4) * 2) % 5;
+    const sparkY = 10 + ((f - 4) % 3);
+    if (sparkX < ox + headW && sparkY < headH) {
+      setPixel(headPixels, headTotalW, sparkX, sparkY, rgba(255, 230, 50));
+    }
+  }
+}
+const minerHeadPath = join(entityDir, 'miner_head.png');
+writeFileSync(minerHeadPath, createPNG(headTotalW, headH, headPixels));
+console.log(`  ✓ ${minerHeadPath}`);
 
 for (const s of entitySprites) {
   const path = join(entityDir, s.name);
