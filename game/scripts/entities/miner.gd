@@ -22,6 +22,17 @@ var _current_tile: Vector2i
 
 func _ready() -> void:
 	add_to_group("miners")
+	_setup_sprite()
+
+
+func _setup_sprite() -> void:
+	## Load miner sprite texture at runtime for headless safety
+	var sprite := get_node_or_null("Visuals/Sprite") as Sprite2D
+	if sprite == null:
+		return
+	var texture: Texture2D = SpriteDB.get_entity_sprite("miner_idle")
+	if texture:
+		sprite.texture = texture
 
 
 const MINER_INVENTORY_SIZE: int = 18

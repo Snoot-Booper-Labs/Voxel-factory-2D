@@ -9,16 +9,8 @@ data = ExtResource("2_data")
 
 [node name="Visuals" type="Node2D" parent="."]
 
-[node name="Body" type="ColorRect" parent="Visuals"]
-offset_right = 16.0
-offset_bottom = 16.0
-color = Color(0.2, 0.2, 0.2, 1)
-
-[node name="Head" type="ColorRect" parent="Visuals"]
-offset_left = 16.0
-offset_right = 32.0
-offset_bottom = 16.0
-color = Color(0.1, 0.1, 0.1, 1)
+[node name="Sprite" type="Sprite2D" parent="Visuals"]
+position = Vector2(8, 8)
 
 [node name="RayCast2D" type="RayCast2D" parent="."]
 position = Vector2(16, 8)

@@ -30,6 +30,7 @@
 - ✅ Signal-based UI updates
 - ✅ 460+ unit and integration tests
 - ✅ World renderer with TileMapLayer
+- ✅ Sprite/graphics pipeline (SpriteDB, entity sprites, item icon atlas)
 
 **Development Tools**
 - ✅ GUT (Godot Unit Testing) framework
@@ -227,7 +228,7 @@ Recipe.new({
 
 - [ ] Miner entity autonomous mining behavior
 - [ ] Conveyor belt item transport
-- [ ] Item entity visuals and physics
+- [x] Item entity visuals and physics
 - [ ] Miner-to-conveyor item output
 - [ ] Conveyor-to-chest storage
 - [ ] Basic resource pipelines
@@ -308,11 +309,11 @@ stateDiagram-v2
 **Current State**: Items only exist as inventory data, no visual representation.
 
 **Tasks**:
-- [ ] Create `ItemEntity` scene (Area2D with sprite)
+- [x] Create `ItemEntity` scene (Area2D with sprite)
 - [ ] Add item pickup by player (on collision)
 - [ ] Add item output from miners
-- [ ] Add item visuals on conveyor belts
-- [ ] Implement item stacking on ground (merge nearby items)
+- [x] Add item visuals on conveyor belts
+- [x] Implement item stacking on ground (merge nearby items)
 - [ ] Add despawn timer for dropped items
 - [ ] Test item lifecycle (spawn, move, pickup, despawn)
 

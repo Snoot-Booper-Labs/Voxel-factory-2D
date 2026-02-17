@@ -10,6 +10,7 @@
 - [Dynamic Chunk Loading](./tracks/dynamic-chunk-loading/index.md) - Implement continuous world loading around the player.
 - [Fix Player Interaction](./tracks/fix-player-interaction/index.md) - Fix broken inputs (jump, inventory toggle, etc.).
 - [Playable Demo UI](./tracks/playable-demo-ui/index.md) - Implementation of the initial playable demo with UI and Scenes.
+- [Sprite Graphics Pipeline](./tracks/sprite-pipeline/index.md) - Initial sprites/graphics pipeline with SpriteDB, entity sprites, and item icon atlas (Issue #20).
 
 ## Future Tracks
 

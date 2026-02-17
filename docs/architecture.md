@@ -30,6 +30,7 @@ graph TB
         Entities[Entities<br/>Miner, Conveyor, Player]
         Components[Components<br/>Inventory, Program, BeltNode]
         World[World Data<br/>TileWorld, TerrainGenerator]
+        StaticData[Static Data<br/>BlockData, ItemData, SpriteDB]
     end
     
     Input --> Controllers
@@ -320,14 +321,18 @@ program-builder/
 │   │   │   ├── entity.gd
 │   │   │   └── system.gd
 │   │   │
-│   │   ├── world/             # World generation
-│   │   │   ├── tile_world.gd
-│   │   │   ├── terrain_generator.gd
-│   │   │   ├── biome_planner.gd
-│   │   │   ├── biome_data.gd
-│   │   │   ├── block_data.gd
-│   │   │   ├── world_system.gd
-│   │   │   └── dimension_system.gd
+    │   │   ├── data/              # Static data classes
+    │   │   │   ├── block_data.gd
+    │   │   │   ├── item_data.gd
+    │   │   │   └── sprite_db.gd
+    │   │   │
+    │   │   ├── world/             # World generation
+    │   │   │   ├── tile_world.gd
+    │   │   │   ├── terrain_generator.gd
+    │   │   │   ├── biome_planner.gd
+    │   │   │   ├── biome_data.gd
+    │   │   │   ├── world_system.gd
+    │   │   │   └── dimension_system.gd
 │   │   │
 │   │   ├── entities/          # Game entities
 │   │   │   ├── miner.gd
@@ -357,10 +362,15 @@ program-builder/
 │   │   └── rendering/         # Visual rendering
 │   │       └── world_renderer.gd
 │   │
-│   └── resources/
-│       └── tiles/
-│           ├── terrain_tileset.tres
-│           └── terrain_atlas.png
+    │   └── resources/
+    │       ├── tiles/
+    │       │   ├── terrain_tileset.tres
+    │       │   └── terrain_atlas.png
+    │       ├── sprites/
+    │       │   └── entities/        # Miner, conveyor, item sprites
+    │       └── icons/
+    │           └── items/
+    │               └── item_icon_atlas.png
 │
 ├── tests/
 │   ├── unit/                  # Unit tests (GUT framework)
@@ -550,9 +560,33 @@ Input handling is separated from game logic:
 - `MiningController` - Handles mining logic, range checks, inventory
 - `PlacementController` - Handles placement logic, item consumption
 
-### 5. Test-Driven Development
+### 5. Direct Tile Mapping (No Terrain Sets)
 
-469 tests cover:
+The rendering pipeline uses a **direct 1:1 mapping** from `BlockType` enum value to atlas X coordinate:
+
+```gdscript
+tile_map_layer.set_cell(screen_pos, TILE_SOURCE_ID, Vector2i(block_type, 0))
+```
+
+Godot 4 offers a **Terrain Sets** system for auto-tiling — assigning peering bits to tiles so Godot automatically selects edge/corner transition variants based on neighboring tiles. We evaluated this and chose **not** to use it for the following reasons:
+
+| Factor | Direct mapping (current) | Terrain sets |
+|--------|:---:|:---:|
+| Complexity | Trivial — O(1) lookup | High — neighbor scanning per cell |
+| Art workload | 1 tile per block type | 16–47 tiles per type (edge variants) |
+| Proc-gen compat | No issues | Chunk-boundary bugs, batch perf concerns |
+| Game genre fit | Discrete functional blocks | Designed for landscape transitions |
+| Flexibility | Easy to extend | Locked into Godot's auto-tile system |
+
+**Why it doesn't fit this game**: Blocks in Voxel Factory 2D are discrete functional units (ore, stone, conveyors), not aesthetic landscape. A dirt tile IS a dirt tile — it doesn't need 47 edge-transition variants. Terrain sets solve a visual blending problem we don't have.
+
+**Performance**: `set_cells_terrain_connect()` scans neighbors for every cell, which community reports flag as slow for procedural generation. Our `set_cell()` approach has zero neighbor dependency and works cleanly with lazy chunk loading.
+
+**Future path**: If visual polish is desired (e.g., stone-to-air cliff edges), a lightweight post-processing pass in `WorldRenderer` can check neighbors and pick from a small set of edge variants — without adopting the full terrain sets system. See [Issue #23](https://github.com/Snoot-Booper-Labs/Voxel-factory-2D/issues/23) for this potential enhancement.
+
+### 6. Test-Driven Development
+
+811+ tests cover:
 - ECS infrastructure
 - World generation determinism
 - Inventory operations

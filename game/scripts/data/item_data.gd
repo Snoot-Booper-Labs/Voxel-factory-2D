@@ -48,6 +48,7 @@ static var item_properties: Dictionary = {
 	ItemType.GRASS: {"max_stack": 64, "name": "Grass", "placeable": true, "block": 1}, # BlockData.BlockType.GRASS
 	ItemType.COBBLESTONE: {"max_stack": 64, "name": "Cobblestone", "placeable": true, "block": 12}, # BlockData.BlockType.COBBLESTONE
 	ItemType.PLANKS: {"max_stack": 64, "name": "Planks", "placeable": true, "block": 13}, # BlockData.BlockType.PLANKS
+	ItemType.BEDROCK: {"max_stack": 64, "name": "Bedrock", "placeable": true, "block": 14}, # BlockData.BlockType.BEDROCK
 	# Entity items
 	ItemType.MINER: {"max_stack": 1, "name": "Miner", "placeable": true, "is_entity": true},
 	ItemType.CONVEYOR: {"max_stack": 64, "name": "Conveyor", "placeable": true, "is_entity": true},
