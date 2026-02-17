@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6behlx176xv3"
-path="res://.godot/imported/miner_idle.png-450161a25ca50224745a3515a18c5d8c.ctex"
+uid="uid://bkkfcfrcrals8"
+path="res://.godot/imported/miner_body.png-10e0fcb0704ba28c9d862c02e8c7500a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/sprites/entities/miner_idle.png"
-dest_files=["res://.godot/imported/miner_idle.png-450161a25ca50224745a3515a18c5d8c.ctex"]
+source_file="res://resources/sprites/entities/miner_body.png"
+dest_files=["res://.godot/imported/miner_body.png-10e0fcb0704ba28c9d862c02e8c7500a.ctex"]
 
 [params]
 

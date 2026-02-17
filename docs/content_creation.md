@@ -100,8 +100,8 @@ Item icons live in `game/resources/icons/items/item_icon_atlas.png` (8 columns �
 ### Entity Sprites
 
 Entity sprite sheets are in `game/resources/sprites/entities/`:
-- `miner_idle.png` — 4 frames × 16×16
-- `miner_walk.png` — 4 frames × 16×16
+- `miner_body.png` — 48×16 static chassis (3 tiles wide)
+- `miner_head.png` — 8 frames × 16×16 (4 idle + 4 mining)
 - `conveyor.png` — 4 frames × 16×16
 - `item_entity.png` — 1 frame, 16×16
 

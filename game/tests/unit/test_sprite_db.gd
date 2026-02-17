@@ -23,7 +23,7 @@ func test_atlas_rows_is_4():
 # =============================================================================
 
 func test_entity_sprites_has_all_keys():
-	var expected_keys = ["miner_idle", "miner_walk", "conveyor", "item_entity"]
+	var expected_keys = ["miner_body", "miner_head", "conveyor", "item_entity"]
 	for key in expected_keys:
 		assert_true(SpriteDB.ENTITY_SPRITES.has(key),
 			"ENTITY_SPRITES should have key '%s'" % key)
@@ -145,7 +145,7 @@ func test_get_item_icon_returns_atlas_texture_or_null():
 # =============================================================================
 
 func test_get_entity_sprite_valid_keys():
-	var keys = ["miner_idle", "miner_walk", "conveyor", "item_entity"]
+	var keys = ["miner_body", "miner_head", "conveyor", "item_entity"]
 	for key in keys:
 		var result = SpriteDB.get_entity_sprite(key)
 		if result != null:
