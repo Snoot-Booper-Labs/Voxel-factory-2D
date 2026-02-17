@@ -85,8 +85,8 @@ var on_belt: bool = false
 ## Whether this entity is being absorbed by a merge (will be freed)
 var _merging: bool = false
 
-## Reference to the visual ColorRect (created in _ready or setup)
-var _sprite: ColorRect
+## Reference to the visual Sprite2D (created in _ready or setup)
+var _sprite: Sprite2D
 
 ## Reference to the count label
 var _count_label: Label
@@ -110,7 +110,7 @@ func _ready() -> void:
 	if not has_node("Sprite"):
 		_create_visuals()
 	else:
-		_sprite = $Sprite
+		_sprite = $Sprite as Sprite2D
 		_count_label = $CountLabel
 		_collision_shape = $CollisionShape2D
 
@@ -325,11 +325,9 @@ func _create_visuals() -> void:
 	_collision_shape.name = "CollisionShape2D"
 	add_child(_collision_shape)
 
-	# Simple colored square as placeholder sprite
-	_sprite = ColorRect.new()
+	# Sprite2D with icon from SpriteDB (centered by default)
+	_sprite = Sprite2D.new()
 	_sprite.name = "Sprite"
-	_sprite.size = Vector2(SPRITE_SIZE, SPRITE_SIZE)
-	_sprite.position = Vector2(-SPRITE_SIZE / 2.0, -SPRITE_SIZE / 2.0)
 	add_child(_sprite)
 
 	# Count label (shown when count > 1)
@@ -344,7 +342,16 @@ func _create_visuals() -> void:
 
 func _update_visuals() -> void:
 	if _sprite:
-		_sprite.color = _get_item_color(item_type)
+		var icon: AtlasTexture = SpriteDB.get_item_icon(item_type)
+		if icon:
+			_sprite.texture = icon
+		else:
+			# Fallback: use the entity sprite sheet when no icon atlas available
+			var fallback: Texture2D = SpriteDB.get_entity_sprite("item_entity")
+			if fallback:
+				_sprite.texture = fallback
+			# Tint with item color for visual distinction
+			_sprite.modulate = _get_item_color(item_type)
 	if _count_label:
 		if count > 1:
 			_count_label.text = str(count)

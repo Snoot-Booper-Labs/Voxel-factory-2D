@@ -43,16 +43,24 @@ func setup(pos: Vector2i, dir: BeltNode.Direction) -> void:
 const BELT_COLOR := Color(0.35, 0.35, 0.4)
 const ARROW_COLOR := Color(0.85, 0.85, 0.2)
 
-var _body: ColorRect
+var _body: Sprite2D
 var _arrow: ColorRect
 
 
 func _create_visuals() -> void:
-	# Belt body - fills the 16x16 tile
-	_body = ColorRect.new()
+	# Belt body - sprite loaded from SpriteDB, falls back to ColorRect
+	_body = Sprite2D.new()
 	_body.name = "Body"
-	_body.size = Vector2(WorldUtils.TILE_SIZE, WorldUtils.TILE_SIZE)
-	_body.color = BELT_COLOR
+	_body.centered = false
+	var texture: Texture2D = SpriteDB.get_entity_sprite("conveyor")
+	if texture:
+		_body.texture = texture
+		# Use only the first frame (16×16) from the sprite sheet
+		_body.region_enabled = true
+		_body.region_rect = Rect2(0, 0, WorldUtils.TILE_SIZE, WorldUtils.TILE_SIZE)
+	else:
+		# Fallback: no sprite available (headless mode) — keep node for structure
+		pass
 	add_child(_body)
 
 	# Direction arrow indicator (small rectangle inside)

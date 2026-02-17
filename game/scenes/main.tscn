@@ -15,7 +15,7 @@
 [ext_resource type="Script" uid="uid://dnq2c360rifwy" path="res://scripts/ui/inventory_ui.gd" id="8_inventory_ui"]
 [ext_resource type="Script" uid="uid://7vn3lfhlo3pf" path="res://scripts/rendering/bgparallax_controller.gd" id="9_bg_controller"]
 [ext_resource type="Script" uid="uid://dpfpdlntmrgnu" path="res://scripts/ui/pause_menu_controller.gd" id="10_pause_menu"]
-[ext_resource type="Script" path="res://scripts/ui/debug_console_controller.gd" id="11_debug_console"]
+[ext_resource type="Script" uid="uid://c18ykm3pjl161" path="res://scripts/ui/debug_console_controller.gd" id="11_debug_console"]
 [ext_resource type="Script" path="res://scripts/ui/miner_inventory_ui.gd" id="12_miner_inventory_ui"]
 
 [sub_resource type="Animation" id="Animation_a8y0u"]

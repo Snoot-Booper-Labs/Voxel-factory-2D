@@ -44,8 +44,8 @@ Items are defined in `game/scripts/data/item_data.gd`.
     - `get_block_for_item()`: If placeable, which `BlockType`?
 
 3.  **Add Icon**:
-    - Add icon to `game/assets/icons/items/`.
-    - Update `ItemData.get_icon_path()` (if implemented) or UI logic.
+    - Add icon to the item icon atlas at `game/resources/icons/items/item_icon_atlas.png`.
+    - Register the icon position in `SpriteDB._icon_positions` in `game/scripts/data/sprite_db.gd`.
 
 ## Adding a New Entity
 
@@ -77,3 +77,39 @@ Components are in `game/scripts/components/`.
     ```
 
 2.  **Use it**: Add it to entities in their `_init()` or dynamically.
+
+## Adding New Sprites
+
+Sprites are managed by `SpriteDB` (`game/scripts/data/sprite_db.gd`) and stored as PNG sprite sheets in `game/resources/`.
+
+### Zero-Code Art Swap
+
+All sprites are designed for drop-in replacement. To swap any sprite, replace its PNG file with a same-dimension image — no code changes required.
+
+### Item Icons
+
+Item icons live in `game/resources/icons/items/item_icon_atlas.png` (8 columns × 4 rows, 16×16px per cell).
+
+1. **Edit the atlas PNG**: Add your icon to an empty cell or replace an existing one.
+2. **Register in SpriteDB**: Add/update the mapping in `SpriteDB._icon_positions`:
+   ```gdscript
+   ItemData.ItemType.MY_ITEM: Vector2i(column, row),
+   ```
+3. **No other changes needed** — `SpriteDB.get_item_icon()` will return the correct `AtlasTexture`.
+
+### Entity Sprites
+
+Entity sprite sheets are in `game/resources/sprites/entities/`:
+- `miner_idle.png` — 4 frames × 16×16
+- `miner_walk.png` — 4 frames × 16×16
+- `conveyor.png` — 4 frames × 16×16
+- `item_entity.png` — 1 frame, 16×16
+
+To add a new entity sprite:
+1. Create a horizontal strip PNG (N frames × 16px wide, 16px tall).
+2. Add the path to `SpriteDB.ENTITY_SPRITES`.
+3. Load it in your entity script via `SpriteDB.get_entity_sprite("key")`.
+
+### Terrain Tiles
+
+The terrain atlas is at `game/resources/tiles/terrain_atlas.png` (15 tiles × 16px horizontal strip). Each tile index maps to a `BlockData.BlockType` enum value. Update the atlas and tileset together.
