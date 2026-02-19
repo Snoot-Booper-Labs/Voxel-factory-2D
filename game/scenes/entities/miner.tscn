@@ -3,43 +3,49 @@
 [ext_resource type="Script" uid="uid://cl1mjbfgc2rlv" path="res://scripts/entities/miner.gd" id="1_script"]
 [ext_resource type="Resource" path="res://resources/data/miner_default.tres" id="2_data"]
 [ext_resource type="Texture2D" uid="uid://bkkfcfrcrals8" path="res://resources/sprites/entities/miner_body.png" id="3_qjnn1"]
-[ext_resource type="Texture2D" uid="uid://das4ba6tc5dku" path="res://resources/sprites/entities/miner_head.png" id="4_olt2p"]
+[ext_resource type="Texture2D" uid="uid://bexdcach68ebe" path="res://resources/sprites/entities/miner_sprite_sheet.png" id="4_wabg7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qjnn1"]
+atlas = ExtResource("4_wabg7")
+region = Rect2(15, 0, 174, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_olt2p"]
+atlas = ExtResource("4_wabg7")
+region = Rect2(207, 0, 174, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wabg7"]
-atlas = ExtResource("4_olt2p")
-region = Rect2(0, 0, 16, 16)
+atlas = ExtResource("4_wabg7")
+region = Rect2(399, 0, 174, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xoqw8"]
-atlas = ExtResource("4_olt2p")
-region = Rect2(16, 0, 16, 16)
+atlas = ExtResource("4_wabg7")
+region = Rect2(591, 0, 174, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_resd5"]
-atlas = ExtResource("4_olt2p")
-region = Rect2(32, 0, 16, 16)
+atlas = ExtResource("4_wabg7")
+region = Rect2(15, 64, 174, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bn5n3"]
-atlas = ExtResource("4_olt2p")
-region = Rect2(48, 0, 16, 16)
+atlas = ExtResource("4_wabg7")
+region = Rect2(207, 64, 174, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3r81m"]
-atlas = ExtResource("4_olt2p")
-region = Rect2(64, 0, 16, 16)
+atlas = ExtResource("4_wabg7")
+region = Rect2(399, 64, 174, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1lqcj"]
-atlas = ExtResource("4_olt2p")
-region = Rect2(80, 0, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ifffc"]
-atlas = ExtResource("4_olt2p")
-region = Rect2(96, 0, 16, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3472b"]
-atlas = ExtResource("4_olt2p")
-region = Rect2(112, 0, 16, 16)
+atlas = ExtResource("4_wabg7")
+region = Rect2(591, 64, 174, 64)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_60urv"]
 animations = [{
 "frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qjnn1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_olt2p")
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_wabg7")
 }, {
@@ -57,12 +63,6 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_1lqcj")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ifffc")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3472b")
 }],
 "loop": true,
 "name": &"default",
@@ -74,12 +74,16 @@ script = ExtResource("1_script")
 data = ExtResource("2_data")
 
 [node name="Body" type="Sprite2D" parent="." unique_id=150580514]
+visible = false
 position = Vector2(24, 8)
 texture = ExtResource("3_qjnn1")
 
 [node name="Head" type="AnimatedSprite2D" parent="." unique_id=1705212279]
-position = Vector2(40, 8)
+position = Vector2(5.13476, 0.19625044)
+scale = Vector2(0.52284557, 0.5061328)
 sprite_frames = SubResource("SpriteFrames_60urv")
+frame = 1
+frame_progress = 0.6732308
 
 [node name="RayCast2D" type="RayCast2D" parent="." unique_id=1552601487]
 position = Vector2(48, 8)

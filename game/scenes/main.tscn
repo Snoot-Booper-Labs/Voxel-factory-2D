@@ -104,7 +104,7 @@ texture = ExtResource("6_3v7cf")
 centered = false
 
 [node name="BGParallax_Overlay" type="ColorRect" parent="BGParallax" unique_id=1240300602]
-offset_right = 1920.0
+offset_right = 3200.0
 offset_bottom = 1080.0
 color = Color(0.38278243, 0.4757207, 0.9323042, 0.39215687)
 
@@ -190,10 +190,8 @@ script = ExtResource("10_pause_menu")
 [node name="DebugConsole" type="PanelContainer" parent="CanvasLayer" unique_id=1950000002]
 process_mode = 3
 visible = false
-layout_mode = 3
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 300.0
 grow_horizontal = 2
-mouse_filter = 0
 script = ExtResource("11_debug_console")

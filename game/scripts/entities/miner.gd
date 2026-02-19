@@ -56,34 +56,34 @@ func _setup_sprite() -> void:
 	var head_tex: Texture2D = SpriteDB.get_entity_sprite("miner_head")
 	if head_tex == null:
 		return
+	_play_animation("default")
+	# var sprite_frames := SpriteFrames.new()
+	# # Remove the default animation if it exists
+	# if sprite_frames.has_animation("default"):
+	# 	sprite_frames.remove_animation("default")
 
-	var sprite_frames := SpriteFrames.new()
-	# Remove the default animation if it exists
-	if sprite_frames.has_animation("default"):
-		sprite_frames.remove_animation("default")
+	# # idle animation — frames 0-3 (x = 0, 16, 32, 48)
+	# sprite_frames.add_animation("idle")
+	# sprite_frames.set_animation_loop("idle", true)
+	# sprite_frames.set_animation_speed("idle", 4.0)
+	# for i in range(HEAD_FRAMES_PER_ANIM):
+	# 	var atlas := AtlasTexture.new()
+	# 	atlas.atlas = head_tex
+	# 	atlas.region = Rect2(i * HEAD_FRAME_SIZE, 0, HEAD_FRAME_SIZE, HEAD_FRAME_SIZE)
+	# 	sprite_frames.add_frame("idle", atlas)
 
-	# idle animation — frames 0-3 (x = 0, 16, 32, 48)
-	sprite_frames.add_animation("idle")
-	sprite_frames.set_animation_loop("idle", true)
-	sprite_frames.set_animation_speed("idle", 4.0)
-	for i in range(HEAD_FRAMES_PER_ANIM):
-		var atlas := AtlasTexture.new()
-		atlas.atlas = head_tex
-		atlas.region = Rect2(i * HEAD_FRAME_SIZE, 0, HEAD_FRAME_SIZE, HEAD_FRAME_SIZE)
-		sprite_frames.add_frame("idle", atlas)
+	# # mining animation — frames 4-7 (x = 64, 80, 96, 112)
+	# sprite_frames.add_animation("mining")
+	# sprite_frames.set_animation_loop("mining", true)
+	# sprite_frames.set_animation_speed("mining", 8.0)
+	# for i in range(HEAD_FRAMES_PER_ANIM):
+	# 	var atlas := AtlasTexture.new()
+	# 	atlas.atlas = head_tex
+	# 	atlas.region = Rect2((HEAD_FRAMES_PER_ANIM + i) * HEAD_FRAME_SIZE, 0, HEAD_FRAME_SIZE, HEAD_FRAME_SIZE)
+	# 	sprite_frames.add_frame("mining", atlas)
 
-	# mining animation — frames 4-7 (x = 64, 80, 96, 112)
-	sprite_frames.add_animation("mining")
-	sprite_frames.set_animation_loop("mining", true)
-	sprite_frames.set_animation_speed("mining", 8.0)
-	for i in range(HEAD_FRAMES_PER_ANIM):
-		var atlas := AtlasTexture.new()
-		atlas.atlas = head_tex
-		atlas.region = Rect2((HEAD_FRAMES_PER_ANIM + i) * HEAD_FRAME_SIZE, 0, HEAD_FRAME_SIZE, HEAD_FRAME_SIZE)
-		sprite_frames.add_frame("mining", atlas)
-
-	_head.sprite_frames = sprite_frames
-	_play_animation("idle")
+	# _head.sprite_frames = sprite_frames
+	# _play_animation("idle")
 
 
 ## Play an animation on the head, avoiding redundant calls.
