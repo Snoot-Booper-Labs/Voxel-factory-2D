@@ -39,6 +39,7 @@ var _held_slot: int = -1
 
 ## Config controls
 var _belt_toggle: CheckButton
+var _run_toggle: CheckButton
 ## Program info placeholder
 var _program_label: Label
 
@@ -180,6 +181,11 @@ func _on_belt_toggle_changed(toggled_on: bool) -> void:
 		_miner.leaves_belt = toggled_on
 
 
+func _on_run_toggle_changed(toggled_on: bool) -> void:
+	if _miner != null:
+		_miner.is_paused = not toggled_on
+
+
 func _sync_config_from_miner() -> void:
 	if _miner == null:
 		return
@@ -189,6 +195,12 @@ func _sync_config_from_miner() -> void:
 			_belt_toggle.toggled.disconnect(_on_belt_toggle_changed)
 		_belt_toggle.button_pressed = _miner.leaves_belt
 		_belt_toggle.toggled.connect(_on_belt_toggle_changed)
+
+	if _run_toggle != null:
+		if _run_toggle.toggled.is_connected(_on_run_toggle_changed):
+			_run_toggle.toggled.disconnect(_on_run_toggle_changed)
+		_run_toggle.button_pressed = not _miner.is_paused
+		_run_toggle.toggled.connect(_on_run_toggle_changed)
 
 
 # =========================================================================
@@ -279,6 +291,13 @@ func _create_panel() -> void:
 	_belt_toggle.position = Vector2(PADDING, header_y)
 	_belt_toggle.toggled.connect(_on_belt_toggle_changed)
 	background.add_child(_belt_toggle)
+
+	_run_toggle = CheckButton.new()
+	_run_toggle.text = "Run Miner"
+	_run_toggle.button_pressed = true
+	_run_toggle.position = Vector2(PADDING + 150, header_y)
+	_run_toggle.toggled.connect(_on_run_toggle_changed)
+	background.add_child(_run_toggle)
 
 	# Program info — right side placeholder
 	_program_label = Label.new()
