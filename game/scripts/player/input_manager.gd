@@ -118,8 +118,8 @@ func _handle_actions() -> void:
 	if player_controller == null:
 		return
 
-	# Block mining/placing when inventory is open
-	if inventory_ui and inventory_ui.is_open():
+	# Block mining/placing when inventory or miner UI is open
+	if (inventory_ui and inventory_ui.is_open()) or (miner_inventory_ui and miner_inventory_ui.is_open()):
 		return
 
 	# simple click-to-interact

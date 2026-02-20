@@ -5,4 +5,5 @@
 [node name="HotbarUI" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+mouse_filter = 0
 script = ExtResource("1_script")

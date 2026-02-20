@@ -66,6 +66,7 @@ func _create_grid() -> void:
 	# Create centered panel background
 	var background = Panel.new()
 	background.name = "Background"
+	background.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(background)
 
 	# Create grid container
