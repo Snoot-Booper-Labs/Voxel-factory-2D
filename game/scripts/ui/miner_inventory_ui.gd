@@ -255,7 +255,7 @@ func _create_panel() -> void:
 
 	# --- Measurements ---
 	var grid_cols = COLUMNS
-	var slot_count = Miner.MINER_INVENTORY_SIZE  # 18
+	var slot_count = Miner.MINER_INVENTORY_SIZE # 18
 	var grid_rows = int(ceil(float(slot_count) / grid_cols))
 	var grid_width = grid_cols * SLOT_SIZE + (grid_cols - 1) * SLOT_MARGIN
 	var grid_height = grid_rows * SLOT_SIZE + (grid_rows - 1) * SLOT_MARGIN
@@ -265,6 +265,7 @@ func _create_panel() -> void:
 	# --- Background panel ---
 	var background = Panel.new()
 	background.name = "Background"
+	background.mouse_filter = Control.MOUSE_FILTER_STOP
 	background.custom_minimum_size = Vector2(panel_width, panel_height)
 	add_child(background)
 

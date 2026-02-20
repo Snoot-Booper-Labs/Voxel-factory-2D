@@ -51,6 +51,7 @@ func _create_slots() -> void:
 	for i in range(SLOT_COUNT):
 		var panel = Panel.new()
 		panel.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
+		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		container.add_child(panel)
 		_slot_panels.append(panel)
 
