@@ -242,6 +242,73 @@ func test_toggle_does_not_affect_previous_miner() -> void:
 
 
 # =============================================================================
+# Config toggle: run_miner
+# =============================================================================
+
+func test_run_toggle_reads_miner_state_paused() -> void:
+	miner.is_paused = true
+	ui.setup(miner)
+	ui.open()
+	assert_false(ui._run_toggle.button_pressed, "Toggle should read miner's is_paused (true -> button_pressed false)")
+
+
+func test_run_toggle_reads_miner_state_running() -> void:
+	miner.is_paused = false
+	ui.setup(miner)
+	ui.open()
+	assert_true(ui._run_toggle.button_pressed, "Toggle should read miner's is_paused (false -> button_pressed true)")
+
+
+func test_run_toggle_writes_miner_state_paused() -> void:
+	miner.is_paused = false
+	ui.setup(miner)
+	ui.open()
+	# Simulate toggling OFF
+	ui._run_toggle.button_pressed = false
+	assert_true(miner.is_paused, "Toggling OFF should set miner.is_paused = true")
+
+
+func test_run_toggle_writes_miner_state_running() -> void:
+	miner.is_paused = true
+	ui.setup(miner)
+	ui.open()
+	# Simulate toggling ON
+	ui._run_toggle.button_pressed = true
+	assert_false(miner.is_paused, "Toggling ON should set miner.is_paused = false")
+
+
+func test_run_switching_miner_updates_toggle() -> void:
+	var miner2 = Miner.new()
+	miner.is_paused = true # not pressed
+	miner2.is_paused = false # pressed
+
+	ui.setup(miner)
+	ui.open()
+	assert_false(ui._run_toggle.button_pressed)
+
+	ui.setup(miner2)
+	assert_true(ui._run_toggle.button_pressed, "Toggle should update when switching miners")
+
+	miner2.queue_free()
+
+
+func test_run_toggle_does_not_affect_previous_miner() -> void:
+	var miner2 = Miner.new()
+	miner.is_paused = false
+	miner2.is_paused = false
+
+	ui.setup(miner)
+	ui.open()
+	ui.setup(miner2)
+	ui._run_toggle.button_pressed = false # pauses miner2
+
+	assert_false(miner.is_paused, "Previous miner should not be affected")
+	assert_true(miner2.is_paused, "Current miner should be affected")
+
+	miner2.queue_free()
+
+
+# =============================================================================
 # Program info placeholder
 # =============================================================================
 

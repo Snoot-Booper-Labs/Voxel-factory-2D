@@ -138,7 +138,7 @@ func test_mine_block_execute_mines_block_from_world():
 func test_mine_block_execute_adds_item_to_inventory():
 	var mine = MineBlock.new()
 	mine.set_parameter("x", 50)
-	mine.set_parameter("y", 15)  # Deeper underground should have stone
+	mine.set_parameter("y", 15) # Deeper underground should have stone
 
 	var world = TileWorld.new(12345)
 	var inventory = Inventory.new()
@@ -160,7 +160,7 @@ func test_mine_block_execute_adds_item_to_inventory():
 func test_mine_block_execute_does_not_mine_air():
 	var mine = MineBlock.new()
 	mine.set_parameter("x", 50)
-	mine.set_parameter("y", 0)  # Above ground is AIR
+	mine.set_parameter("y", 0) # Above ground is AIR
 
 	var world = TileWorld.new(12345)
 	var inventory = Inventory.new()
@@ -290,9 +290,9 @@ func test_miner_executes_program_and_mines():
 	miner.start_mining(world)
 
 	# Execute ticks
-	miner.tick()  # Execute START
-	miner.tick()  # Execute MINE
-	miner.tick()  # Execute END (completes)
+	miner.tick() # Execute START
+	miner.tick() # Execute MINE
+	miner.tick() # Execute END (completes)
 
 	# Verify block was mined
 	assert_eq(world.get_block(test_x, test_y), BlockData.BlockType.AIR, "Block should be mined to AIR")
@@ -431,7 +431,7 @@ func test_miner_setup_direction_left():
 
 
 # =============================================================================
-# Serialize / Deserialize with leaves_belt
+# Serialize / Deserialize with leaves_belt and is_paused
 # =============================================================================
 
 func test_miner_serialize_includes_leaves_belt():
@@ -459,7 +459,7 @@ func test_miner_deserialize_restores_leaves_belt_true():
 
 func test_miner_deserialize_restores_leaves_belt_false():
 	var miner = Miner.new()
-	miner.leaves_belt = true  # Set to true first
+	miner.leaves_belt = true # Set to true first
 	miner.deserialize({"leaves_belt": false})
 	assert_false(miner.leaves_belt, "deserialize should restore leaves_belt = false")
 	miner.free()
@@ -467,9 +467,48 @@ func test_miner_deserialize_restores_leaves_belt_false():
 
 func test_miner_deserialize_defaults_leaves_belt_false():
 	var miner = Miner.new()
-	miner.leaves_belt = true  # Set to true first
-	miner.deserialize({})  # No leaves_belt key
+	miner.leaves_belt = true # Set to true first
+	miner.deserialize({}) # No leaves_belt key
 	assert_false(miner.leaves_belt, "deserialize should default leaves_belt to false")
+	miner.free()
+
+
+func test_miner_serialize_includes_is_paused():
+	var miner = Miner.new()
+	miner.is_paused = true
+	var data = miner.serialize()
+	assert_true(data.has("is_paused"), "serialize should include is_paused")
+	assert_true(data["is_paused"], "serialize should store is_paused value")
+	miner.free()
+
+
+func test_miner_serialize_is_paused_false():
+	var miner = Miner.new()
+	var data = miner.serialize()
+	assert_false(data["is_paused"], "serialize should store false when is_paused is false")
+	miner.free()
+
+
+func test_miner_deserialize_restores_is_paused_true():
+	var miner = Miner.new()
+	miner.deserialize({"is_paused": true})
+	assert_true(miner.is_paused, "deserialize should restore is_paused = true")
+	miner.free()
+
+
+func test_miner_deserialize_restores_is_paused_false():
+	var miner = Miner.new()
+	miner.is_paused = true # Set to true first
+	miner.deserialize({"is_paused": false})
+	assert_false(miner.is_paused, "deserialize should restore is_paused = false")
+	miner.free()
+
+
+func test_miner_deserialize_defaults_is_paused_false():
+	var miner = Miner.new()
+	miner.is_paused = true # Set to true first
+	miner.deserialize({}) # No is_paused key
+	assert_false(miner.is_paused, "deserialize should default is_paused to false")
 	miner.free()
 
 
@@ -478,6 +517,7 @@ func test_miner_serialize_deserialize_roundtrip():
 	miner.position = Vector2(64, -48)
 	miner.direction = Vector2i.LEFT
 	miner.leaves_belt = true
+	miner.is_paused = true
 	miner.get_inventory().add_item(ItemData.ItemType.COAL, 5)
 
 	var data = miner.serialize()
@@ -485,6 +525,7 @@ func test_miner_serialize_deserialize_roundtrip():
 	var miner2 = Miner.new()
 	miner2.deserialize(data)
 	assert_true(miner2.leaves_belt, "Round-trip should preserve leaves_belt")
+	assert_true(miner2.is_paused, "Round-trip should preserve is_paused")
 	assert_true(miner2.get_inventory().has_item(ItemData.ItemType.COAL, 5),
 		"Round-trip should preserve inventory")
 
@@ -542,7 +583,7 @@ func test_push_items_to_belt_respects_belt_capacity():
 
 	var belt = BeltNode.new()
 	belt.set_position(Vector2i(1, 0))
-	belt.add_item(ItemData.ItemType.IRON_ORE)  # Fill the belt (MAX_ITEMS=1)
+	belt.add_item(ItemData.ItemType.IRON_ORE) # Fill the belt (MAX_ITEMS=1)
 	belt_system.register_belt(belt)
 
 	var remaining = miner._push_items_to_belt(ItemData.ItemType.COAL, 1)
@@ -587,7 +628,7 @@ func test_complete_mining_to_belt_first():
 	miner.direction = Vector2i.RIGHT
 	# Miner at tile (5, 0)
 	miner.position = WorldUtils.tile_to_world(Vector2i(5, 0))
-	miner._current_mining_block_pos = Vector2i(7, 0)  # Mine target
+	miner._current_mining_block_pos = Vector2i(7, 0) # Mine target
 
 	# Place a belt behind the miner at tile (4, 0)
 	var belt = BeltNode.new()
@@ -625,7 +666,7 @@ func test_complete_mining_falls_back_to_inventory():
 	# Belt behind miner is full
 	var belt = BeltNode.new()
 	belt.set_position(Vector2i(4, 0))
-	belt.add_item(ItemData.ItemType.IRON_ORE)  # Fill belt
+	belt.add_item(ItemData.ItemType.IRON_ORE) # Fill belt
 	belt_system.register_belt(belt)
 
 	world.set_block(7, 0, BlockData.BlockType.STONE)

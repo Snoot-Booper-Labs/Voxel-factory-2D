@@ -24,6 +24,7 @@ var belt_system: BeltSystem
 ## When true, the miner places a conveyor belt on each tile it vacates.
 ## Belts face opposite to the miner's direction so items flow back.
 var leaves_belt: bool = false
+var is_paused: bool = false
 var _state: State = State.IDLE
 var _target_pos: Vector2
 var _mine_progress: float = 0.0
@@ -88,9 +89,19 @@ func _setup_sprite() -> void:
 
 ## Play an animation on the head, avoiding redundant calls.
 func _play_animation(anim_name: String) -> void:
-	if _head and _current_anim != anim_name:
-		_current_anim = anim_name
-		_head.play(anim_name)
+	if _head == null or _head.sprite_frames == null:
+		return
+
+	var target_anim := anim_name
+	if not _head.sprite_frames.has_animation(target_anim):
+		if _head.sprite_frames.has_animation("default"):
+			target_anim = "default"
+		else:
+			return
+
+	if _current_anim != target_anim:
+		_current_anim = target_anim
+		_head.play(target_anim)
 
 
 const MINER_INVENTORY_SIZE: int = 18
@@ -152,6 +163,10 @@ func _process(delta: float) -> void:
 	# For now, let's assume if _process is running, it does simple logic.
 	# Unit tests likely don't add to scene or don't rely on _process/physics.
 	if tile_world == null:
+		return
+
+	if is_paused:
+		_play_animation("idle")
 		return
 
 	match _state:
@@ -321,6 +336,7 @@ func serialize() -> Dictionary:
 		"direction": {"x": direction.x, "y": direction.y},
 		"state": _state,
 		"leaves_belt": leaves_belt,
+		"is_paused": is_paused,
 		"inventory": get_inventory().serialize(),
 	}
 
@@ -331,6 +347,7 @@ func deserialize(data: Dictionary) -> void:
 	var state_val: int = int(data.get("state", State.IDLE))
 	_state = state_val as State
 	leaves_belt = data.get("leaves_belt", false)
+	is_paused = data.get("is_paused", false)
 
 	var inv_data: Array = data.get("inventory", [])
 	if inv_data.size() > 0:
